@@ -39,6 +39,8 @@
         "modules/screenshot.js",
         "modules/auto-answer.js",
         "modules/mcq-orchestrator.js",
+        "modules/mcq-detector.js",
+        "modules/mcq-automation-system.js",
         "modules/ui-dashboard.js",
         "content.js"
       ],

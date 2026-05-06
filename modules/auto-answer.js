@@ -416,6 +416,274 @@ class AutoAnswerManager {
   delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
+
+  /**
+   * Advanced selector finder with multiple fallback strategies
+   */
+  findAnswerOptionAdvanced(questionElement, answerText) {
+    const strategies = [
+      // Strategy 1: Exact letter match
+      () => this.findByExactLetter(questionElement, answerText),
+      // Strategy 2: Text content match
+      () => this.findByTextContent(questionElement, answerText),
+      // Strategy 3: Partial match
+      () => this.findByPartialMatch(questionElement, answerText),
+      // Strategy 4: Data attribute match
+      () => this.findByDataAttribute(questionElement, answerText),
+      // Strategy 5: Index-based (fallback)
+      () => this.findByIndex(questionElement, answerText)
+    ];
+
+    for (const strategy of strategies) {
+      try {
+        const result = strategy();
+        if (result) {
+          console.log('[AutoAnswer] Found answer using strategy:', strategy.name);
+          return result;
+        }
+      } catch (error) {
+        continue;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Find by exact letter prefix (A, B, C, D)
+   */
+  findByExactLetter(questionElement, answerText) {
+    const letter = answerText.toUpperCase().trim()[0];
+    if (!/[A-E]/.test(letter)) return null;
+
+    const elements = questionElement.querySelectorAll(
+      'input[type="radio"], input[type="checkbox"], button, label, .option, .choice'
+    );
+
+    for (const elem of elements) {
+      const text = elem.textContent.toUpperCase().trim();
+      if (text.startsWith(letter + '.') || text.startsWith(letter + ')') || text === letter) {
+        return { element: elem, text, confidence: 0.95 };
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Find by text content similarity
+   */
+  findByTextContent(questionElement, answerText) {
+    const answerUpper = answerText.toUpperCase().trim();
+    const elements = questionElement.querySelectorAll(
+      'input[type="radio"], input[type="checkbox"], button, label, .option, .choice'
+    );
+
+    let bestMatch = null;
+    let bestScore = 0;
+
+    for (const elem of elements) {
+      const text = elem.textContent.toUpperCase().trim();
+      
+      // Calculate similarity score
+      const score = this.stringSimilarity(answerUpper, text);
+      
+      if (score > bestScore && score > 0.6) {
+        bestScore = score;
+        bestMatch = { element: elem, text, confidence: score };
+      }
+    }
+
+    return bestMatch;
+  }
+
+  /**
+   * Find by partial text match
+   */
+  findByPartialMatch(questionElement, answerText) {
+    const answerUpper = answerText.toUpperCase().trim();
+    const keywords = answerUpper.split(/\s+/).slice(0, 3);  // First 3 words
+
+    const elements = questionElement.querySelectorAll(
+      'input[type="radio"], input[type="checkbox"], button, label, .option, .choice'
+    );
+
+    for (const elem of elements) {
+      const text = elem.textContent.toUpperCase().trim();
+      
+      let matches = 0;
+      for (const keyword of keywords) {
+        if (text.includes(keyword)) matches++;
+      }
+
+      if (matches >= Math.ceil(keywords.length * 0.7)) {
+        return { element: elem, text, confidence: 0.8 };
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Find by data attributes
+   */
+  findByDataAttribute(questionElement, answerText) {
+    const elements = questionElement.querySelectorAll('[data-value], [data-answer], [data-option]');
+
+    for (const elem of elements) {
+      const dataValue = elem.getAttribute('data-value')?.toUpperCase() || '';
+      const dataAnswer = elem.getAttribute('data-answer')?.toUpperCase() || '';
+      const dataOption = elem.getAttribute('data-option')?.toUpperCase() || '';
+
+      if (dataValue.includes(answerText[0]) || dataAnswer.includes(answerText[0]) || dataOption.includes(answerText[0])) {
+        return { element: elem, text: elem.textContent.trim(), confidence: 0.85 };
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Find by index (A=0, B=1, C=2, D=3)
+   */
+  findByIndex(questionElement, answerText) {
+    const letter = answerText.toUpperCase().trim()[0];
+    if (!/[A-E]/.test(letter)) return null;
+
+    const index = letter.charCodeAt(0) - 65;  // A=0, B=1, etc.
+    const elements = questionElement.querySelectorAll(
+      'input[type="radio"], input[type="checkbox"], button, label, .option, .choice'
+    );
+
+    if (index < elements.length) {
+      const elem = elements[index];
+      return { element: elem, text: elem.textContent.trim(), confidence: 0.5 };
+    }
+
+    return null;
+  }
+
+  /**
+   * Calculate string similarity (0-1)
+   */
+  stringSimilarity(s1, s2) {
+    const longer = s1.length > s2.length ? s1 : s2;
+    const shorter = s1.length > s2.length ? s2 : s1;
+
+    if (longer.length === 0) return 1;
+
+    const editDistance = this.levenshteinDistance(longer, shorter);
+    return (longer.length - editDistance) / longer.length;
+  }
+
+  /**
+   * Calculate Levenshtein distance between two strings
+   */
+  levenshteinDistance(s1, s2) {
+    const costs = [];
+
+    for (let i = 0; i <= s1.length; i++) {
+      let lastValue = i;
+      for (let j = 0; j <= s2.length; j++) {
+        if (i === 0) {
+          costs[j] = j;
+        } else if (j > 0) {
+          let newValue = costs[j - 1];
+          if (s1.charAt(i - 1) !== s2.charAt(j - 1)) {
+            newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+          }
+          costs[j - 1] = lastValue;
+          lastValue = newValue;
+        }
+      }
+      if (i > 0) costs[s2.length] = lastValue;
+    }
+
+    return costs[s2.length];
+  }
+
+  /**
+   * Batch apply multiple answers with progress callback
+   */
+  async applyAnswersWithProgress(answers, conversationId, onProgress) {
+    const results = [];
+    const total = answers.length;
+
+    for (let i = 0; i < answers.length; i++) {
+      try {
+        const result = await this.selectAnswer(answers[i], conversationId);
+        results.push(result);
+
+        if (onProgress) {
+          onProgress({
+            current: i + 1,
+            total,
+            percentage: Math.round(((i + 1) / total) * 100),
+            lastResult: result
+          });
+        }
+
+        if (this.humanLike) {
+          await this.randomDelay(this.selectionDelay);
+        }
+      } catch (error) {
+        results.push({
+          questionIndex: answers[i].questionIndex,
+          success: false,
+          error: error.message
+        });
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * Undo last selection
+   */
+  async undoLastSelection() {
+    // Find and uncheck the most recently checked element
+    const allInputs = document.querySelectorAll('input[type="radio"]:checked, input[type="checkbox"]:checked');
+    if (allInputs.length > 0) {
+      const lastInput = allInputs[allInputs.length - 1];
+      lastInput.checked = false;
+      lastInput.dispatchEvent(new Event('change', { bubbles: true }));
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Get detailed selection report
+   */
+  getSelectionReport(answers) {
+    const report = {
+      totalAnswers: answers.length,
+      successful: 0,
+      failed: 0,
+      byType: {},
+      errors: []
+    };
+
+    for (const answer of answers) {
+      if (answer.success) {
+        report.successful++;
+        if (!report.byType[answer.inputType]) {
+          report.byType[answer.inputType] = 0;
+        }
+        report.byType[answer.inputType]++;
+      } else {
+        report.failed++;
+        report.errors.push({
+          questionIndex: answer.questionIndex,
+          error: answer.error
+        });
+      }
+    }
+
+    report.successRate = (report.successful / report.totalAnswers) * 100;
+    return report;
+  }
 }
 
 // Export for use

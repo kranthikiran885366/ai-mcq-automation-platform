@@ -10,7 +10,9 @@
     "tabs",
     "webNavigation",
     "tabCapture",
-    "declarativeNetRequest"
+    "declarativeNetRequest",
+    "alarms",
+    "notifications"
   ],
   "host_permissions": ["<all_urls>"],
   "content_security_policy": {
@@ -31,7 +33,15 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "js": [
+        "modules/storage.js",
+        "modules/whatsapp.js",
+        "modules/screenshot.js",
+        "modules/auto-answer.js",
+        "modules/mcq-orchestrator.js",
+        "modules/ui-dashboard.js",
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
   ],

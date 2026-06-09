@@ -66,8 +66,8 @@ This document outlines the comprehensive testing strategy for the **Advanced AI 
 
 ```bash
 # Clone repository
-git clone https://github.com/mvksolutions/mcq-automation-bot.git
-cd mcq-automation-bot
+git clone https://github.com/kranthikiran885366/ai-mcq-automation-platform.git
+cd ai-mcq-automation-platform
 
 # Install dependencies
 pip install -r backend/requirements.txt

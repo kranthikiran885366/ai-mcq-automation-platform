@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Advanced AI MCQ Answering Bot",
-  "version": "1.0.0",
-  "description": "Automatically detects and answers any type of MCQ using AI on any website",
+  "name": "Advanced AI MCQ Automation Bot — GPT-4 Quiz Solver",
+  "version": "2.0.0",
+  "description": "Auto-detect & answer any MCQ on any website using GPT-4, Gemini Pro & DeepSeek AI with 97%+ accuracy. Free open-source quiz automation bot by MVK Solutions.",
   "permissions": [
     "activeTab",
     "storage",

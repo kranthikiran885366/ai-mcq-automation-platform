@@ -883,7 +883,7 @@ app.post('/webhook/mcq-automation', (req, res) => {
 - **🎮 Interactive API Explorer**: [api.mvksolutions.com/explorer](https://api.mvksolutions.com/explorer)
 - **💬 Developer Support**: [support@mvksolutions.com](mailto:support@mvksolutions.com)
 - **📱 Status Page**: [status.mvksolutions.com](https://status.mvksolutions.com)
-- **🔧 GitHub Repository**: [github.com/mvksolutions/mcq-automation-bot](https://github.com/mvksolutions/mcq-automation-bot)
+- **🔧 GitHub Repository**: [github.com/kranthikiran885366/ai-mcq-automation-platform](https://github.com/kranthikiran885366/ai-mcq-automation-platform)
 
 ---
 

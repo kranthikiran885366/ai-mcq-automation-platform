@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+  <!-- ── GitHub Pages Home (Priority 1.0) ─────────── -->
+  <url>
+    <loc>https://kranthikiran885366.github.io/ai-mcq-automation-platform/</loc>
+    <lastmod>2025-06-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- ── GitHub Repo Root ──────────────────────────── -->
+  <url>
+    <loc>https://github.com/kranthikiran885366/ai-mcq-automation-platform</loc>
+    <lastmod>2025-06-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+
+  <!-- ── README ────────────────────────────────────── -->
+  <url>
+    <loc>https://github.com/kranthikiran885366/ai-mcq-automation-platform/blob/main/README.md</loc>
+    <lastmod>2025-06-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <!-- ── API Docs ───────────────────────────────────── -->
+  <url>
+    <loc>https://github.com/kranthikiran885366/ai-mcq-automation-platform/blob/main/docs/API.md</loc>
+    <lastmod>2025-06-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <!-- ── Releases ──────────────────────────────────── -->
+  <url>
+    <loc>https://github.com/kranthikiran885366/ai-mcq-automation-platform/releases</loc>
+    <lastmod>2025-06-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <!-- ── Contributing ──────────────────────────────── -->
+  <url>
+    <loc>https://github.com/kranthikiran885366/ai-mcq-automation-platform/blob/main/docs/CONTRIBUTING.md</loc>
+    <lastmod>2025-06-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+
+  <!-- ── Testing ───────────────────────────────────── -->
+  <url>
+    <loc>https://github.com/kranthikiran885366/ai-mcq-automation-platform/blob/main/docs/TESTING.md</loc>
+    <lastmod>2025-06-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+
+  <!-- ── Issues ────────────────────────────────────── -->
+  <url>
+    <loc>https://github.com/kranthikiran885366/ai-mcq-automation-platform/issues</loc>
+    <lastmod>2025-06-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.60</priority>
+  </url>
+
+  <!-- ── Discussions ───────────────────────────────── -->
+  <url>
+    <loc>https://github.com/kranthikiran885366/ai-mcq-automation-platform/discussions</loc>
+    <lastmod>2025-06-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.60</priority>
+  </url>
+
+</urlset>

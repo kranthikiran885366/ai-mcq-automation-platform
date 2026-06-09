@@ -22,4 +22,5 @@ Allow: /
 User-agent: Google-Extended
 Allow: /
 
+Sitemap: https://kranthikiran885366.github.io/ai-mcq-automation-platform/sitemap-index.xml
 Sitemap: https://kranthikiran885366.github.io/ai-mcq-automation-platform/sitemap.xml

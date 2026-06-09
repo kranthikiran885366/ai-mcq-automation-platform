@@ -463,9 +463,33 @@ var CodeWriter = globalThis.CodeWriter || class CodeWriter {
       }
     }
 
+    // 7. Read current editor content and detect language from it
+    if (PC && editorEl && hints.length === 0) {
+      try {
+        const currentCode = editorEl.value
+          || editorEl.querySelector?.('textarea')?.value
+          || editorEl.textContent
+          || '';
+        if (currentCode.trim().length > 10) {
+          const fromEditor = PC.detectLanguageFromCode(PC.unescapeHtml(currentCode));
+          if (fromEditor) addHint(fromEditor, 14);
+        }
+      } catch (_) {}
+    }
+
     if (PC) {
       const lang = PC.normalizeLanguage(hints);
       if (lang) return lang;
+    }
+    // Final fallback: detect from any code on the page before giving up
+    if (PC) {
+      const pageCode = document.querySelector(
+        'textarea, .CodeMirror-code, .monaco-editor, .ace_editor, pre[class*="language"]'
+      )?.textContent || '';
+      if (pageCode.trim().length > 15) {
+        const fromPage = PC.detectLanguageFromCode(pageCode.substring(0, 1000));
+        if (fromPage) return fromPage;
+      }
     }
     return PC?.PIPELINE_CONFIG?.fallbackLanguage || 'python';
   }
@@ -1015,7 +1039,15 @@ var CodeWriter = globalThis.CodeWriter || class CodeWriter {
           }
 
           code = this._sanitizeAICode(code, lockedLanguage, cq);
-          language = this._refineLanguageFromCode(code, lockedLanguage);
+          // Only refine language if detection is confident; never downgrade a
+          // platform-set language (e.g. python) to javascript due to weak signals.
+          const refined = this._refineLanguageFromCode(code, lockedLanguage);
+          if (refined && refined !== lockedLanguage) {
+            const PC = globalThis.PlatformConfig;
+            const detectedFromCode = PC ? PC.detectLanguageFromCode(code) : null;
+            // Only accept the refinement when the code scorer is unambiguous
+            if (detectedFromCode && detectedFromCode === refined) language = refined;
+          }
 
           if (!this._isCompleteSolution(code, language, cq)) {
             notify('⚠️ AI returned incomplete code — requesting full solution...', 'info');
@@ -1352,11 +1384,15 @@ var CodeWriter = globalThis.CodeWriter || class CodeWriter {
     const fnName = cq?.fnName && cq.editorEl ? cq.fnName : null;
     if (fnName && !code.includes(fnName)) errors.push(`Missing function "${fnName}"`);
 
+    // Re-detect language from the actual generated code before comparing—
+    // avoids false "Wrong language" when AI writes valid code that doesn’t
+    // have strong enough signals for the scorer (e.g. short Python snippets).
     const detectedLang = this._detectSourceLanguage(code);
     const expectedLang = PC ? PC.normalizeToken(lang) : lang;
     if (detectedLang && expectedLang && PC &&
         !PC.languagesMatch(expectedLang, detectedLang) &&
-        detectedLang !== 'javascript') {
+        detectedLang !== 'javascript' &&
+        detectedLang !== expectedLang) {
       errors.push(`Wrong language: generated ${detectedLang} but editor requires ${expectedLang}`);
     }
 
@@ -1478,8 +1514,13 @@ var CodeWriter = globalThis.CodeWriter || class CodeWriter {
       if (applied === 0) return null;
 
       console.log(`[CodeWriter] Surgical edit: ${applied} patch(es) applied, ${failed} failed`);
-      // Sanitize after patching to catch any remaining issues
-      return this._sanitizeAICode(patched, language, cq);
+      // IMPORTANT: do NOT call _sanitizeAICode / sanitizeCode here.
+      // sanitizeCode runs extractSingleSolution which strips functions and causes
+      // "Missing function" loops. Only do safe cleanup: HTML-decode + strip fences.
+      const PC = globalThis.PlatformConfig;
+      let safe = PC ? PC.unescapeHtml(patched) : patched;
+      safe = safe.replace(/^```[\w]*\n?/gm, '').replace(/```\s*$/gm, '').trim();
+      return safe;
     } catch (e) {
       console.warn('[CodeWriter] Surgical fix failed:', e.message);
       return null;

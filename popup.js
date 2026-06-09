@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const themeToggle = document.getElementById("themeToggle")
   const errorMessage = document.getElementById("errorMessage")
   const startAuto = document.getElementById("start-auto")
+  const stopBot    = document.getElementById("stop-bot")
   const startAutoToggle = document.getElementById("startAutoToggle")
   const reOCR = document.getElementById("re-ocr")
   const langSelect = document.getElementById("lang-select")
@@ -150,6 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isActive) {
       startAuto.classList.add('active');
       startAuto.textContent = 'Stop Auto Detection';
+      stopBot.classList.add('visible');
       showStatus('Auto detection enabled', 'success');
       
       // Enable the bot if not already enabled
@@ -161,6 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       startAuto.classList.remove('active');
       startAuto.textContent = 'Auto Detect & OCR';
+      stopBot.classList.remove('visible');
       showStatus('Auto detection disabled', 'info');
     }
   });
@@ -257,8 +260,31 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Toggle bot status
-  botToggle.addEventListener("change", () => {
+  // Stop Bot button — immediately halts the running agent
+  if (stopBot) {
+    stopBot.addEventListener('click', async () => {
+      stopBot.textContent = 'Stopping...';
+      stopBot.disabled = true;
+
+      // Tell content script to stop the agent
+      try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tab?.id) {
+          chrome.tabs.sendMessage(tab.id, { action: 'stopAgent' }, () => {
+            if (chrome.runtime.lastError) {}
+          });
+        }
+      } catch (_) {}
+
+      // Reset UI
+      startAutoToggle.checked = false;
+      startAutoToggle.dispatchEvent(new Event('change'));
+      stopBot.textContent = '\u23f9 Stop Bot';
+      stopBot.disabled = false;
+      showStatus('Bot stopped', 'info');
+      updateStatusIndicator(false);
+    });
+  }
     const isEnabled = botToggle.checked
 
     chrome.storage.sync.set({ botEnabled: isEnabled })

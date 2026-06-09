@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced AI MCQ Bot</title>
+  <style>
+    body {
+      width: 340px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 15px;
+      background-color: #f9f9f9;
+      margin: 0;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1.5px solid #e5e7eb;
+    }
+    .logo {
+      width: 44px;
+      height: 44px;
+      margin-right: 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #22223b;
+      letter-spacing: -0.5px;
+    }
+    .container {
+      background: linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%);
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1.5px 4px rgba(0,0,0,0.04);
+      padding: 20px;
+      margin-bottom: 20px;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .status-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      margin-right: 10px;
+      background: #cbd5e1;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+      transition: background 0.3s;
+    }
+    .status-dot.active {
+      background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+      animation: pulse-green 1.2s infinite;
+    }
+    .status-dot.inactive {
+      background: linear-gradient(90deg, #f43f5e 0%, #be123c 100%);
+      animation: pulse-red 1.2s infinite;
+    }
+    @keyframes pulse-green {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+      50% { box-shadow: 0 0 0 8px rgba(34,197,94,0.1); }
+    }
+    @keyframes pulse-red {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(244,63,94,0.4); }
+      50% { box-shadow: 0 0 0 8px rgba(244,63,94,0.1); }
+    }
+    .status-text {
+      font-size: 14px;
+    }
+    .toggle-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .toggle-label {
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .toggle {
+      position: relative;
+      display: inline-block;
+      width: 52px;
+      height: 28px;
+    }
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #cbd5e1;
+      transition: background 0.3s;
+      border-radius: 28px;
+    }
+    .toggle input:checked + .slider {
+      background: linear-gradient(90deg, #6366f1 0%, #06b6d4 100%);
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background: #fff;
+      transition: transform 0.3s;
+      border-radius: 50%;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+    }
+    .toggle input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+    .button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(90deg, #6366f1 0%, #06b6d4 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(99,102,241,0.08);
+      margin-bottom: 10px;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .button:hover {
+      background: linear-gradient(90deg, #4f46e5 0%, #0ea5e9 100%);
+      box-shadow: 0 4px 16px rgba(99,102,241,0.12);
+    }
+    .button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    .button.secondary {
+      background: #f1f5f9;
+      color: #22223b;
+    }
+    .button.secondary:hover {
+      background: #e0e7ef;
+    }
+    .dark-mode .button.secondary {
+      background: #23272f;
+      color: #fff;
+    }
+    .settings-link {
+      display: block;
+      margin-top: 20px;
+      text-align: center;
+      color: #3b82f6;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 12px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    #start-auto {
+      width: 100%;
+      padding: 12px 16px;
+      margin: 10px 0;
+      background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2);
+    }
+    #start-auto:hover {
+      background: linear-gradient(90deg, #4338ca 0%, #6d28d9 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+    #start-auto:active {
+      transform: translateY(0);
+    }
+    #start-auto:disabled {
+      background: #e5e7eb;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    #start-auto.active {
+      background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+    }
+    
+    #stop-bot {
+      width: 100%;
+      padding: 12px 16px;
+      margin: 6px 0 10px;
+      background: linear-gradient(90deg, #ef4444 0%, #b91c1c 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(239,68,68,0.25);
+      display: none;
+    }
+    #stop-bot:hover {
+      background: linear-gradient(90deg, #dc2626 0%, #991b1b 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(239,68,68,0.35);
+    }
+    #stop-bot.visible { display: block; }
+    .settings-link:hover {
+      color: #6366f1;
+      text-decoration: underline;
+    }
+    .api-status {
+      font-size: 12px;
+      color: #666;
+      margin-top: 10px;
+      text-align: center;
+    }
+    .api-status.connected {
+      color: #4CAF50;
+    }
+    .api-status.disconnected {
+      color: #F44336;
+    }
+    .mode-selector {
+      margin-bottom: 15px;
+    }
+    .mode-selector select {
+      width: 100%;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 12px;
+      color: #666;
+    }
+    .stats-item {
+      text-align: center;
+    }
+    .stats-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #6366f1;
+    }
+    .dark-mode .stats-value {
+      color: #38bdf8;
+    }
+    .theme-toggle {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+    }
+    .dark-mode {
+      background-color: #222;
+      color: #eee;
+    }
+    .dark-mode .container {
+      background: linear-gradient(135deg, #23272f 0%, #18181b 100%);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.32), 0 1.5px 4px rgba(0,0,0,0.16);
+    }
+    .dark-mode h1, .dark-mode .toggle-label {
+      color: #fff;
+    }
+    .dark-mode .button.secondary {
+      background-color: #444;
+      color: #eee;
+    }
+    .mcq-info {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+      font-size: 12px;
+      max-height: 100px;
+      overflow-y: auto;
+    }
+    .dark-mode .mcq-info {
+      background-color: #444;
+    }
+    .mcq-question {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .mcq-answer {
+      color: #4CAF50;
+    }
+    .dark-mode .mcq-answer {
+      color: #8BC34A;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      background: white;
+    }
+    
+    .dark-mode .form-control {
+      background: #333;
+      border-color: #555;
+      color: #fff;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      font-size: 13px;
+    }
+    
+    .status-message {
+      padding: 8px;
+      border-radius: 4px;
+      margin: 10px 0;
+      font-size: 12px;
+      display: none;
+    }
+    
+    .status-message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      display: block;
+    }
+    
+    .status-message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      display: block;
+    }
+    
+    .status-message.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+      display: block;
+    }
+    
+    .preview-image {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    
+    .ocr-result {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 4px;
+      padding: 10px;
+      font-size: 12px;
+      max-height: 150px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    
+    .dark-mode .ocr-result {
+      background: #2d3748;
+      border-color: #4a5568;
+      color: #e2e8f0;
+    }
+    /* Responsive */
+    @media (max-width: 400px) {
+      .container { padding: 10px; }
+      h1 { font-size: 16px; }
+      .button { font-size: 13px; padding: 10px; }
+    }
+    /* Banner Styles */
+    .banner {
+      width: 100%;
+      background: linear-gradient(90deg, #6366f1 0%, #06b6d4 100%);
+      color: #fff;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 10px 16px 10px 36px;
+      position: relative;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(99,102,241,0.08);
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px;
+      margin-bottom: 10px;
+      animation: fadeIn 0.6s;
+    }
+    .banner a {
+      color: #fff;
+      text-decoration: underline;
+      margin-left: 6px;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .banner .close-btn {
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.12);
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .banner .close-btn:hover {
+      background: rgba(0,0,0,0.22);
+    }
+  </style>
+</head>
+<body>
+  <div class="banner" id="installBanner">
+    <img src="./icons/icon48.png" alt="Logo" style="width:24px;height:24px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,0.10);margin-right:8px;">
+    <span style="font-weight:700;margin-right:8px;">Advanced AI MCQ Bot</span>
+    <button class="close-btn" onclick="this.parentElement.style.display='none'" aria-label="Close">&times;</button>
+    Add this extension to Chrome for the best experience!
+    <a href="https://chrome.google.com/webstore/category/extensions" target="_blank">Get it on Chrome Web Store</a>
+  </div>
+  
+  <button id="themeToggle" class="theme-toggle">🌙</button>
+  
+  <div class="header">
+    <img src="icons/icon48.png" alt="Logo" class="logo">
+    <h1>Advanced AI MCQ Bot</h1>
+  </div>
+  
+  <div class="container">
+    <div class="status">
+      <div id="statusDot" class="status-dot inactive"></div>
+      <div id="statusText" class="status-text">Bot is inactive</div>
+    </div>
+    <div id="errorMessage" style="display:none; color:#F44336; background:#fff3f3; border:1px solid #F44336; border-radius:4px; padding:8px; margin-bottom:10px; font-size:13px;"></div>
+    
+    <div class="toggle-container">
+      <span class="toggle-label">Enable Bot</span>
+      <label class="toggle">
+        <input type="checkbox" id="botToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+    
+    <div class="mode-selector">
+      <select id="modeSelect">
+        <option value="learning">Learning Mode</option>
+        <option value="safe">Safe Mode</option>
+        <option value="stealth">Stealth Mode</option>
+      </select>
+    </div>
+    
+    <div class="toggle-container">
+      <span class="toggle-label">Voice Narration</span>
+      <label class="toggle">
+        <input type="checkbox" id="voiceToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+    
+    <div class="toggle-container">
+      <span class="toggle-label">Auto-Answer</span>
+      <label class="toggle">
+        <input type="checkbox" id="autoAnswerToggle" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+    
+    <div style="margin-top: 10px;">
+      <label style="display: flex; align-items: center; gap: 8px;">
+        <input type="checkbox" id="humanMouseMovementToggle">
+        Human-like Mouse Movement
+      </label>
+      <small style="color: #888;">(Simulates random mouse movement, clicks, and scrolling for advanced human-like behavior.)</small>
+    </div>
+    
+    <button id="scanButton" class="button">Scan for MCQs</button>
+    <button id="captureButton" class="button secondary">Capture Screen</button>
+    
+    <div id="mcqInfo" class="mcq-info" style="display: none;">
+      <div class="mcq-question">Question: </div>
+      <div class="mcq-answer">Answer: </div>
+    </div>
+    
+    <div id="apiStatus" class="api-status disconnected">
+      API Status: Not Connected
+    </div>
+    
+    <div class="stats">
+      <div class="stats-item">
+        <div class="stats-value" id="mcqsFound">0</div>
+        <div>MCQs Found</div>
+      </div>
+      <div class="stats-item">
+        <div class="stats-value" id="mcqsAnswered">0</div>
+        <div>Answered</div>
+      </div>
+      <div class="stats-item">
+        <div class="stats-value" id="accuracy">0%</div>
+        <div>Accuracy</div>
+      </div>
+    </div>
+  </div>
+  
+  <a href="options.html" class="settings-link">Settings & API Configuration</a>
+  
+  <div class="container">
+    <div class="toggle-container">
+      <span class="toggle-label">Start Auto Detection</span>
+      <label class="toggle">
+        <input type="checkbox" id="startAutoToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+    
+    <button id="start-auto" class="button">Auto Detect & OCR</button>
+    <button id="stop-bot">⏹ Stop Bot</button>
+    
+    <div class="form-group">
+      <label for="lang-select">OCR Language:</label>
+      <select id="lang-select" class="form-control">
+        <option value="eng">English</option>
+        <option value="hin">Hindi</option>
+        <option value="spa">Spanish</option>
+        <option value="fra">French</option>
+        <option value="deu">German</option>
+      </select>
+    </div>
+    
+    <button id="re-ocr" class="button secondary">Re-OCR</button>
+    
+    <div id="status" class="status-message"></div>
+    <img id="preview" class="preview-image" style="max-width:100%;max-height:200px;display:none;"/>
+    <pre id="ocr-result" class="ocr-result"></pre>
+  </div>
+  
+  <script src="config.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

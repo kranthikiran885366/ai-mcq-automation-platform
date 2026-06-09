@@ -439,6 +439,24 @@ function createDashboard() {
         </button>
       </div>
 
+      <div id="stop-bot-wrap" style="margin-bottom: 16px; display: none;">
+        <button id="stop-bot-btn" style="
+          width: 100%;
+          padding: 12px;
+          background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+          color: white;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: 600;
+          font-size: 14px;
+          box-shadow: 0 2px 8px rgba(239,68,68,0.3);
+          transition: all 0.2s ease;
+        ">
+          ⏹ Stop Bot
+        </button>
+      </div>
+
       <div id="status-message" style="
         padding: 12px;
         background: #f5f5f5;
@@ -473,16 +491,46 @@ function createDashboard() {
 
   // Scan & Answer — MCQs + coding rounds (auto-fix + dynamic tests)
   document.getElementById('scan-answer-btn').addEventListener('click', async () => {
-    showStatus('🔍 Scanning page for MCQs & coding questions...', 'info');
-    await runFullScanAndSolve();
+    const stopWrap = document.getElementById('stop-bot-wrap');
+    const scanBtn  = document.getElementById('scan-answer-btn');
+    showStatus('\uD83D\uDD0D Scanning page for MCQs & coding questions...', 'info');
+    stopWrap.style.display = 'block';
+    scanBtn.disabled = true;
+    try {
+      await runFullScanAndSolve();
+    } finally {
+      stopWrap.style.display = 'none';
+      scanBtn.disabled = false;
+    }
   });
 
-  // Auto-Write Code button
+  // Auto-Write Code button — show Stop while running, hide after
   document.getElementById('write-code-btn').addEventListener('click', async () => {
-    showStatus('💻 Detecting coding questions...', 'info');
-    const provider = await resolveAiProvider(runtimeSettings.aiProvider);
-    runtimeSettings.aiProvider = provider;
-    await codeWriter.runPipeline(provider, (msg, type) => showStatus(msg, type));
+    const stopWrap = document.getElementById('stop-bot-wrap');
+    const writeBtn = document.getElementById('write-code-btn');
+    showStatus('\uD83D\uDCBB Detecting coding questions...', 'info');
+    stopWrap.style.display = 'block';
+    writeBtn.disabled = true;
+    try {
+      const provider = await resolveAiProvider(runtimeSettings.aiProvider);
+      runtimeSettings.aiProvider = provider;
+      await codeWriter.runPipeline(provider, (msg, type) => showStatus(msg, type));
+    } finally {
+      stopWrap.style.display = 'none';
+      writeBtn.disabled = false;
+    }
+  });
+
+  // Stop Bot button inside the dashboard
+  document.getElementById('stop-bot-btn').addEventListener('click', () => {
+    // Stop active agent
+    if (globalThis._activeAgent) globalThis._activeAgent.stop();
+    if (codeWriter) codeWriter._pipelineBusy = false;
+    _pipelineRunning = false;
+    document.getElementById('stop-bot-wrap').style.display = 'none';
+    const writeBtn = document.getElementById('write-code-btn');
+    if (writeBtn) writeBtn.disabled = false;
+    showStatus('\u23F9 Bot stopped', 'info');
   });
 
   // Auto-show status on activity
@@ -766,6 +814,16 @@ async function handleMessage(request) {
           return { success: false, error: e.message };
         }
       }
+
+    case 'stopAgent':
+      // Stop the running AutoFixAgent and CodeWriter pipeline immediately
+      if (globalThis.AutoFixAgent && globalThis._activeAgent) {
+        globalThis._activeAgent.stop();
+      }
+      if (codeWriter) codeWriter._pipelineBusy = false;
+      _pipelineRunning = false;
+      showStatus('Bot stopped by user', 'info');
+      return { success: true };
 
     case 'ping':
       return { success: true, ready: true };

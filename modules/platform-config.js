@@ -14,7 +14,7 @@ var PlatformConfig = globalThis.PlatformConfig || (function () {
     postRunDelayMs: 900,
     postRunDelayByPlatform: { leetcode: 800 },
     defaultPostRunDelayMs: 400,
-    fallbackLanguage: 'java',
+    fallbackLanguage: 'python',
   };
 
   const LANG_DEFAULTS = {
@@ -502,102 +502,107 @@ var PlatformConfig = globalThis.PlatformConfig || (function () {
   }
 
   function detectLanguageFromCode(code) {
-    // Unescape HTML entities before pattern matching so encoded code is detected correctly
     const src = unescapeHtml(code || '');
     if (!src.trim()) return null;
 
-    // Weighted multi-signal scorer — more signals = more confidence
     const scores = {};
     const bump = (lang, pts) => { scores[lang] = (scores[lang] || 0) + pts; };
 
-    // ── JavaScript / TypeScript ──────────────────────────────────────────
-    if (/\bfunction\s+\w+\s*\(/.test(src))          bump('javascript', 8);
-    if (/\b(?:const|let|var)\s+\w+\s*=/.test(src))  bump('javascript', 5);
-    if (/=>\s*\{/.test(src))                         bump('javascript', 5);
-    if (/\.forEach|\bmap\(|\bfilter\(/.test(src))   bump('javascript', 4);
-    if (/\bnull\b|\bundefined\b/.test(src))          bump('javascript', 3);
-    if (/===|!==/.test(src))                         bump('javascript', 4);
+    // ── Python — check FIRST, strong exclusive signals ────────────────────
+    const hasPythonDef  = /^\s*def\s+\w+\s*\(/m.test(src);
+    const hasPythonIndent = hasPythonDef && !/[{};]/.test(src); // no braces at all = pure Python
+    if (hasPythonDef)                                            bump('python', 15);
+    if (hasPythonIndent)                                         bump('python', 10); // brace-free = very strong
+    if (/^\s*class\s+\w+[:(]/m.test(src))                       bump('python', 8);
+    if (/^\s*import\s+\w+/m.test(src))                          bump('python', 6);
+    if (/^\s*from\s+\w+\s+import/m.test(src))                   bump('python', 8);
+    if (/\belif\b/.test(src))                                    bump('python', 10); // elif is Python-only
+    if (/\bNone\b/.test(src))                                    bump('python', 6);  // None is Python-only
+    if (/\bTrue\b|\bFalse\b/.test(src))                         bump('python', 5);
+    if (/self\./.test(src))                                      bump('python', 8);
+    if (/print\s*\(/.test(src))                                  bump('python', 3);
+    // Python-exclusive: colon at end of control lines
+    if (/^\s*(?:if|for|while|with|try|except|finally|else)\b.*:\s*$/m.test(src)) bump('python', 8);
+
+    // ── JavaScript / TypeScript ───────────────────────────────────────────
+    // Only give JS points for signals that DON'T appear in Python
+    if (/\bfunction\s+\w+\s*\(/.test(src))                      bump('javascript', 10);
+    if (/(?:const|let|var)\s+\w+\s*=/.test(src) && !hasPythonDef) bump('javascript', 5);
+    if (/=>\s*\{/.test(src))                                     bump('javascript', 8);
+    if (/\.forEach|\bmap\(|\bfilter\(/.test(src) && !hasPythonDef) bump('javascript', 4);
+    if (/\bundefined\b/.test(src))                               bump('javascript', 5); // JS-only
+    if (/===|!==/.test(src) && !hasPythonDef)                    bump('javascript', 4);
     if (/:\s*(?:number|string|boolean|void|any)/.test(src)) {
-      bump('typescript', 10); bump('javascript', -3);
+      bump('typescript', 12); bump('javascript', -3);
     }
-    if (/interface\s+\w+|type\s+\w+\s*=/.test(src)) bump('typescript', 8);
+    if (/interface\s+\w+|type\s+\w+\s*=/.test(src))             bump('typescript', 10);
+    // Brace-based code without Python def = strong JS signal
+    if (!hasPythonDef && /\{[^}]{2,}\}/.test(src))              bump('javascript', 3);
 
-    // ── Python ───────────────────────────────────────────────────────────
-    if (/^\s*def\s+\w+\s*\(/m.test(src))             bump('python', 15);
-    if (/^\s*class\s+\w+[:(]/m.test(src))            bump('python', 8);
-    if (/^\s*import\s+\w+/m.test(src))               bump('python', 6);
-    if (/^\s*from\s+\w+\s+import/m.test(src))        bump('python', 8);
-    if (/:\s*$|\belif\b|\bNone\b|\bTrue\b|\bFalse\b/.test(src)) bump('python', 5);
-    if (/print\s*\(/.test(src))                      bump('python', 4);
-    if (/self\./.test(src))                          bump('python', 6);
+    // ── Java ──────────────────────────────────────────────────────────────
+    if (/\bpublic\s+class\s+\w+/.test(src))                     bump('java', 15);
+    if (/\bpublic\s+(?:static\s+)?\w+\s+\w+\s*\(/.test(src))   bump('java', 10);
+    if (/\bSystem\.out\.print/.test(src))                       bump('java', 10);
+    if (/\bString\[\]|int\[\]|List</.test(src))                 bump('java', 6);
+    if (/\bimport\s+java\./.test(src))                          bump('java', 12);
+    if (/@Override/.test(src))                                   bump('java', 10);
+    if (/\bvoid\s+\w+\s*\(/.test(src) && !hasPythonDef)        bump('java', 4);
 
-    // ── Java ─────────────────────────────────────────────────────────────
-    if (/\bpublic\s+class\s+\w+/.test(src))          bump('java', 15);
-    if (/\bpublic\s+(?:static\s+)?\w+\s+\w+\s*\(/.test(src)) bump('java', 10);
-    if (/\bSystem\.out\.print/.test(src))            bump('java', 10);
-    if (/\bString\[\]|int\[\]|List</.test(src))      bump('java', 6);
-    if (/\bimport\s+java\./.test(src))               bump('java', 10);
-    if (/\bnew\s+\w+\s*\(/.test(src))               bump('java', 3);
-    if (/@Override/.test(src))                        bump('java', 8);
+    // ── C ─────────────────────────────────────────────────────────────────
+    if (/#include\s*<\w+\.h>/.test(src))                        bump('c', 14);
+    if (/\bprintf\s*\(|\bscanf\s*\(/.test(src))                 bump('c', 8);
+    if (/\bint\s+main\s*\(/.test(src))                          bump('c', 10);
+    if (/\bmalloc\s*\(|\bfree\s*\(/.test(src))                  bump('c', 10);
+    if (/#include\s*<stdio\.h>/.test(src))                       bump('c', 10);
 
-    // ── C ────────────────────────────────────────────────────────────────
-    if (/#include\s*<\w+\.h>/.test(src))             bump('c', 12);
-    if (/\bprintf\s*\(|\bscanf\s*\(/.test(src))      bump('c', 8);
-    if (/\bint\s+main\s*\(/.test(src))               bump('c', 10);
-    if (/\bmalloc\s*\(|\bfree\s*\(/.test(src))       bump('c', 8);
-    if (/#include\s*<stdio\.h>/.test(src))            bump('c', 10);
+    // ── C++ ───────────────────────────────────────────────────────────────
+    if (/#include\s*<iostream>/.test(src))                       bump('cpp', 14);
+    if (/using\s+namespace\s+std/.test(src))                     bump('cpp', 12);
+    if (/std::/.test(src))                                       bump('cpp', 8);
+    if (/\bcout\s*<<|\bcin\s*>>/.test(src))                     bump('cpp', 12);
+    if (/vector<|map<|set</.test(src))                           bump('cpp', 6);
 
-    // ── C++ ──────────────────────────────────────────────────────────────
-    if (/#include\s*<iostream>/.test(src))            bump('cpp', 12);
-    if (/using\s+namespace\s+std/.test(src))          bump('cpp', 12);
-    if (/std::/.test(src))                            bump('cpp', 8);
-    if (/\bcout\s*<<|\bcin\s*>>/.test(src))          bump('cpp', 10);
-    if (/vector<|map<|set</.test(src))                bump('cpp', 6);
-    if (/::\w+/.test(src))                            bump('cpp', 4);
+    // ── C# ────────────────────────────────────────────────────────────────
+    if (/using\s+System/.test(src))                              bump('csharp', 12);
+    if (/namespace\s+\w+/.test(src))                             bump('csharp', 10);
+    if (/Console\.Write/.test(src))                              bump('csharp', 12);
+    if (/List<\w+>|Dictionary</.test(src))                       bump('csharp', 8);
+    if (/\bvar\s+\w+\s*=\s*new/.test(src))                      bump('csharp', 5);
 
-    // ── C# ───────────────────────────────────────────────────────────────
-    if (/using\s+System/.test(src))                   bump('csharp', 12);
-    if (/namespace\s+\w+/.test(src))                  bump('csharp', 10);
-    if (/Console\.Write/.test(src))                   bump('csharp', 10);
-    if (/\.cs\b|List<\w+>|Dictionary</.test(src))    bump('csharp', 6);
-    if (/\bvar\s+\w+\s*=\s*new/.test(src))           bump('csharp', 5);
+    // ── Go ────────────────────────────────────────────────────────────────
+    if (/^package\s+\w+/m.test(src))                            bump('go', 18);
+    if (/\bfunc\s+\w+\s*\(/.test(src) && !hasPythonDef)        bump('go', 12);
+    if (/\bfmt\.Print/.test(src))                               bump('go', 10);
+    if (/:=/.test(src))                                          bump('go', 10);
+    if (/\bimport\s+"/.test(src))                               bump('go', 8);
 
-    // ── Go ───────────────────────────────────────────────────────────────
-    if (/^package\s+\w+/m.test(src))                 bump('go', 15);
-    if (/\bfunc\s+\w+\s*\(/.test(src))              bump('go', 12);
-    if (/\bfmt\.Print/.test(src))                    bump('go', 10);
-    if (/:=/.test(src))                               bump('go', 8);
-    if (/\bimport\s+"/.test(src))                    bump('go', 6);
+    // ── Rust ──────────────────────────────────────────────────────────────
+    if (/\bfn\s+\w+\s*\(/.test(src) && !hasPythonDef)          bump('rust', 12);
+    if (/\blet\s+mut\s+\w+/.test(src))                         bump('rust', 12);
+    if (/println!|eprintln!/.test(src))                          bump('rust', 12);
+    if (/\buse\s+std::/.test(src))                              bump('rust', 10);
+    if (/impl\s+\w+/.test(src))                                 bump('rust', 8);
 
-    // ── Rust ─────────────────────────────────────────────────────────────
-    if (/\bfn\s+\w+\s*\(/.test(src))                bump('rust', 12);
-    if (/\blet\s+mut\s+\w+/.test(src))              bump('rust', 10);
-    if (/println!|eprintln!/.test(src))               bump('rust', 10);
-    if (/->\s*\w+\s*\{/.test(src))                  bump('rust', 6);
-    if (/\buse\s+std::/.test(src))                   bump('rust', 8);
-    if (/impl\s+\w+/.test(src))                      bump('rust', 8);
+    // ── Kotlin ────────────────────────────────────────────────────────────
+    if (/\bfun\s+\w+\s*\(/.test(src) && !hasPythonDef)         bump('kotlin', 12);
+    if (/\bval\s+\w+|\bvar\s+\w+\s*:/.test(src))               bump('kotlin', 8);
+    if (/println\s*\(/.test(src) && !hasPythonDef)              bump('kotlin', 6);
 
-    // ── Kotlin ───────────────────────────────────────────────────────────
-    if (/\bfun\s+\w+\s*\(/.test(src))               bump('kotlin', 12);
-    if (/\bval\s+\w+|\bvar\s+\w+\s*:/.test(src))    bump('kotlin', 8);
-    if (/println\s*\(/.test(src))                    bump('kotlin', 6);
-    if (/->\s*\w+\s*\{|:\s*\w+\s*\{/.test(src))    bump('kotlin', 4);
-
-    // ── SQL ──────────────────────────────────────────────────────────────
-    if (/\bSELECT\b.*\bFROM\b/i.test(src))           bump('sql', 15);
-    if (/\bCREATE\s+TABLE\b/i.test(src))             bump('sql', 12);
-    if (/\bINSERT\s+INTO\b/i.test(src))              bump('sql', 10);
+    // ── SQL ───────────────────────────────────────────────────────────────
+    if (/\bSELECT\b.*\bFROM\b/i.test(src))                      bump('sql', 18);
+    if (/\bCREATE\s+TABLE\b/i.test(src))                        bump('sql', 14);
+    if (/\bINSERT\s+INTO\b/i.test(src))                         bump('sql', 12);
 
     const ranked = Object.entries(scores)
       .filter(([, v]) => v > 0)
       .sort((a, b) => b[1] - a[1]);
 
     if (!ranked.length) return null;
-    // Only return a result if top score is meaningfully higher than second
     const [topLang, topScore] = ranked[0];
     const secondScore = ranked[1]?.[1] || 0;
-    if (topScore < 5) return null;          // too weak a signal
-    if (topScore - secondScore < 3 && topScore < 12) return null; // ambiguous
+    // Require a clear margin — ambiguous = return null so caller keeps its language
+    if (topScore < 8) return null;
+    if (topScore - secondScore < 5 && topScore < 15) return null;
     return normalizeToken(topLang);
   }
 
@@ -1055,12 +1060,24 @@ var PlatformConfig = globalThis.PlatformConfig || (function () {
     const { fnName, platformId } = opts;
     code = unescapeHtml(code);
     code = (code || '').replace(/^```[\w]*\n?/gm, '').replace(/```\s*$/gm, '').trim();
-    const name = fnName || extractFunctionName(code, language);
-    code = extractSingleSolution(code, language, name, platformId);
-    code = removeStubs(code, language, name);
-    code = autoFixCode(code, language);
-    code = ensureStructure(code, language, platformId, name);
-    code = extractSingleSolution(code, language, name, platformId);
+
+    // Auto-detect language from the actual code when the caller passes an
+    // unresolved / fallback language — prevents sanitizing Python as Java.
+    const detectedLang = detectLanguageFromCode(code);
+    const resolvedLang = normalizeToken(language)
+      || detectedLang
+      || PIPELINE_CONFIG.fallbackLanguage;
+    // If detected language is confident and different from what was passed, use it
+    const effectiveLang = (detectedLang && normalizeToken(language) !== detectedLang)
+      ? detectedLang
+      : resolvedLang;
+
+    const name = fnName || extractFunctionName(code, effectiveLang);
+    code = extractSingleSolution(code, effectiveLang, name, platformId);
+    code = removeStubs(code, effectiveLang, name);
+    code = autoFixCode(code, effectiveLang);
+    code = ensureStructure(code, effectiveLang, platformId, name);
+    code = extractSingleSolution(code, effectiveLang, name, platformId);
     code = _hardDedup(code);  // final catch-all for any remaining duplicates
     return stripTestHarness(code).trim();
   }

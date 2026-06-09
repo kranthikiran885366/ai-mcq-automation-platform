@@ -1,0 +1,35 @@
+# CODEOWNERS — ALL files require owner review before any PR can be merged.
+# No changes can be merged without explicit approval from @kranthikiran885366
+
+# Root: every file
+* @kranthikiran885366
+
+# Extension core
+content.js                        @kranthikiran885366
+background.js                     @kranthikiran885366
+popup.js                          @kranthikiran885366
+popup.html                        @kranthikiran885366
+manifest.json                     @kranthikiran885366
+config.js                         @kranthikiran885366
+options.js                        @kranthikiran885366
+options.html                      @kranthikiran885366
+
+# Modules — most sensitive, lock individually too
+modules/auto-fix-agent.js         @kranthikiran885366
+modules/code-writer.js            @kranthikiran885366
+modules/platform-config.js        @kranthikiran885366
+modules/error-handler.js          @kranthikiran885366
+modules/mcq-detector.js           @kranthikiran885366
+modules/mcq-orchestrator.js       @kranthikiran885366
+modules/auto-answer.js            @kranthikiran885366
+modules/storage.js                @kranthikiran885366
+modules/ui-dashboard.js           @kranthikiran885366
+modules/whatsapp.js               @kranthikiran885366
+modules/whatsapp-manager.js       @kranthikiran885366
+
+# Backend
+backend/                          @kranthikiran885366
+
+# DevOps / CI
+devops/                           @kranthikiran885366
+.github/                          @kranthikiran885366

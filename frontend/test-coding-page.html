@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Coding Assessment — 3 Problems</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0f0f1a;color:#cdd6f4;display:flex;flex-direction:column}
+
+/* ── top bar ── */
+#topbar{background:#181825;border-bottom:2px solid #313244;display:flex;align-items:stretch;height:46px;flex-shrink:0}
+.qbtn{padding:0 20px;background:none;border:none;border-right:1px solid #313244;color:#6c7086;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px}
+.qbtn:hover{background:#252535;color:#cdd6f4}
+.qbtn.active{background:#252535;color:#cba6f7;border-bottom:3px solid #cba6f7}
+.q-badge{font-size:9px;padding:1px 6px;border-radius:8px;font-weight:700}
+.b-pend{background:#313244;color:#6c7086}
+.b-pass{background:#1a3d1a;color:#a6e3a1}
+.b-fail{background:#3d1a1a;color:#f38ba8}
+.b-run {background:#1a2a3d;color:#89b4fa}
+#topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px;padding:0 14px;border-left:1px solid #313244}
+#lang-sel{background:#252535;color:#cdd6f4;border:1px solid #45475a;border-radius:5px;padding:5px 10px;font-size:12px;cursor:pointer}
+.tbtn{padding:6px 16px;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;transition:.15s}
+.tbtn:hover{filter:brightness(1.1)}
+.tbtn:disabled{opacity:.5;cursor:not-allowed}
+#btn-run  {background:#a6e3a1;color:#0f1a0f}
+#btn-reset{background:#45475a;color:#cdd6f4}
+#timer{font-size:13px;font-weight:700;color:#f38ba8;font-family:'Courier New',monospace;min-width:52px;text-align:center}
+
+/* ── split ── */
+#split{flex:1;display:flex;min-height:0}
+
+/* ── LEFT: problem ── */
+#left{width:44%;min-width:280px;max-width:60%;background:#1e1e2e;border-right:2px solid #313244;display:flex;flex-direction:column;overflow:hidden}
+#prob-header{padding:16px 18px 0;flex-shrink:0}
+.prob-idx{font-size:10px;font-weight:700;color:#89b4fa;text-transform:uppercase;letter-spacing:.8px}
+.prob-title{font-size:17px;font-weight:700;color:#cdd6f4;margin:4px 0}
+.diff-chip{display:inline-block;font-size:10px;font-weight:700;padding:2px 10px;border-radius:10px;margin-bottom:2px}
+.dc-easy  {background:#1a3d1a;color:#a6e3a1}
+.dc-medium{background:#3d2a00;color:#f9e2af}
+.dc-hard  {background:#3d1a1a;color:#f38ba8}
+.meta-row {display:flex;gap:12px;margin:6px 0 0;font-size:11px;color:#6c7086}
+.meta-row span{display:flex;align-items:center;gap:4px}
+
+#left-scroll{flex:1;overflow-y:auto;padding:14px 18px 20px}
+#left-scroll::-webkit-scrollbar{width:5px}
+#left-scroll::-webkit-scrollbar-thumb{background:#45475a;border-radius:4px}
+
+.sec-hdr{font-size:10px;font-weight:700;color:#6c7086;text-transform:uppercase;letter-spacing:.6px;margin:14px 0 6px;padding-bottom:4px;border-bottom:1px solid #313244}
+.prob-desc{font-size:13px;line-height:1.75;color:#cdd6f4}
+.prob-desc strong{color:#cba6f7}
+.prob-desc em{color:#f9e2af;font-style:normal}
+
+.ex-box{background:#11111b;border:1px solid #313244;border-radius:8px;padding:12px 14px;margin:6px 0;font-family:'Courier New',monospace;font-size:12px}
+.ex-hdr{font-size:10px;font-weight:700;color:#89b4fa;margin-bottom:7px;text-transform:uppercase;letter-spacing:.5px}
+.ex-line{display:flex;gap:0;margin:3px 0;line-height:1.5}
+.ex-k{color:#6c7086;min-width:72px;flex-shrink:0}
+.ex-v{color:#a6e3a1;word-break:break-all}
+.ex-o{color:#f9e2af;word-break:break-all}
+.ex-exp{color:#6c7086;font-style:italic;margin-top:5px;font-family:'Segoe UI',sans-serif;font-size:11px}
+
+.constraints{background:#11111b;border:1px solid #313244;border-radius:8px;padding:10px 14px;font-size:12px;font-family:'Courier New',monospace;color:#a6adc8}
+.constraints li{margin:3px 0 3px 14px;list-style:disc}
+
+/* ── resizer ── */
+#resizer{width:4px;background:#313244;cursor:col-resize;flex-shrink:0}
+#resizer:hover,#resizer.drag{background:#cba6f7}
+
+/* ── RIGHT: editor + console ── */
+#right{flex:1;min-width:0;display:flex;flex-direction:column;background:#11111b}
+#editor-topbar{background:#1e1e2e;border-bottom:1px solid #313244;padding:5px 12px;display:flex;align-items:center;gap:10px;flex-shrink:0;font-size:12px}
+.ed-file{color:#cdd6f4;font-weight:600}
+.ed-lang{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700}
+#run-status{margin-left:auto;font-size:11px;font-weight:600}
+
+#code-area{flex:1;width:100%;background:#11111b;color:#cdd6f4;border:none;font-family:'Courier New',monospace;font-size:14px;padding:14px 16px;resize:none;outline:none;line-height:1.65;min-height:0}
+#code-area::-webkit-scrollbar{width:6px}
+#code-area::-webkit-scrollbar-thumb{background:#313244;border-radius:4px}
+
+/* ── console ── */
+#console{background:#181825;border-top:2px solid #313244;flex-shrink:0;display:flex;flex-direction:column;height:220px}
+#console-tabs{display:flex;border-bottom:1px solid #313244;flex-shrink:0}
+.ctab{padding:6px 16px;background:none;border:none;border-bottom:2px solid transparent;color:#6c7086;font-size:12px;font-weight:600;cursor:pointer}
+.ctab.on{color:#cba6f7;border-bottom-color:#cba6f7}
+#console-body{flex:1;overflow-y:auto;padding:8px 12px;font-size:12px;font-family:'Courier New',monospace}
+#console-body::-webkit-scrollbar{width:4px}
+#console-body::-webkit-scrollbar-thumb{background:#45475a;border-radius:4px}
+#console-status{padding:5px 12px;font-size:11px;color:#6c7086;border-top:1px solid #313244;flex-shrink:0}
+
+/* ── test case rows ── */
+.tc{display:grid;grid-template-columns:18px 1fr auto auto;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;margin:3px 0;background:#11111b;border:1px solid #252535}
+.tc.pass{border-color:#1a3d1a}.tc.fail{border-color:#3d1a1a}.tc.run{border-color:#1a2a3d}
+.tc-i{font-size:13px}
+.tc-lbl{color:#a6adc8;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tc.pass .tc-lbl{color:#a6e3a1}
+.tc-got{color:#f38ba8;font-size:11px;text-align:right}
+.tc-exp{color:#a6e3a1;font-size:11px;text-align:right}
+
+.tc-detail{background:#11111b;border:1px solid #252535;border-radius:6px;padding:8px 12px;margin:2px 0 6px;font-size:11px;line-height:1.6}
+.td-row{display:flex;gap:6px;margin:2px 0}
+.td-k{color:#6c7086;min-width:70px;flex-shrink:0}
+.td-v{color:#cdd6f4;word-break:break-all}
+.td-v.ok{color:#a6e3a1}.td-v.bad{color:#f38ba8}
+
+.submit-row{display:flex;gap:10px;padding:8px 12px;border-top:1px solid #313244;flex-shrink:0;align-items:center}
+#btn-submit{padding:6px 20px;background:linear-gradient(135deg,#cba6f7,#89b4fa);color:#1e1e2e;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer}
+#btn-submit:hover{filter:brightness(1.08)}
+#submit-result{font-size:12px;font-weight:700}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <button class="qbtn active" id="qb0" onclick="gotoQ(0)">
+    <span>1. Two Sum</span><span class="q-badge b-pend" id="qbadge0">—</span>
+  </button>
+  <button class="qbtn" id="qb1" onclick="gotoQ(1)">
+    <span>2. Valid Parentheses</span><span class="q-badge b-pend" id="qbadge1">—</span>
+  </button>
+  <button class="qbtn" id="qb2" onclick="gotoQ(2)">
+    <span>3. Maximum Subarray</span><span class="q-badge b-pend" id="qbadge2">—</span>
+  </button>
+  <div id="topbar-right">
+    <span id="timer">45:00</span>
+    <select id="lang-sel" onchange="changeLang()">
+      <option value="javascript">JavaScript</option>
+      <option value="python">Python</option>
+      <option value="java">Java</option>
+    </select>
+    <button class="tbtn" id="btn-run"   onclick="runTests()">▶ Run</button>
+    <button class="tbtn" id="btn-reset" onclick="resetCode()">↺ Reset</button>
+  </div>
+</div>
+
+<div id="split">
+  <!-- LEFT -->
+  <div id="left">
+    <div id="prob-header">
+      <div class="prob-idx" id="prob-idx">Problem 1 / 3</div>
+      <div class="prob-title" id="prob-title">Two Sum</div>
+      <span class="diff-chip dc-easy" id="prob-diff">Easy</span>
+      <div class="meta-row">
+        <span>⏱ Time: O(n)</span>
+        <span>🧠 Space: O(n)</span>
+        <span id="prob-pts">⭐ 100 pts</span>
+      </div>
+    </div>
+    <div id="left-scroll">
+      <div class="sec-hdr">Problem Statement</div>
+      <div class="prob-desc" id="prob-desc"></div>
+      <div class="sec-hdr" style="margin-top:18px">Examples</div>
+      <div id="prob-examples"></div>
+      <div class="sec-hdr" style="margin-top:18px">Constraints</div>
+      <div class="constraints"><ul id="prob-constraints"></ul></div>
+    </div>
+  </div>
+
+  <div id="resizer"></div>
+
+  <!-- RIGHT -->
+  <div id="right">
+    <div id="editor-topbar">
+      <span class="ed-file" id="ed-file">solution.js</span>
+      <span class="ed-lang" id="ed-lang" style="background:#2a2200;color:#f9e2af">JS</span>
+      <span id="run-status"></span>
+    </div>
+    <textarea id="code-area" spellcheck="false" data-coding-name="prob0" data-language="javascript"></textarea>
+    <div id="console">
+      <div id="console-tabs">
+        <button class="ctab on" id="ctab-tc"  onclick="showConsole('tc')">Test Cases</button>
+        <button class="ctab"    id="ctab-out" onclick="showConsole('out')">Console</button>
+      </div>
+      <div id="console-body"></div>
+      <div class="submit-row">
+        <button id="btn-submit" onclick="submitAll()">✔ Submit</button>
+        <span id="submit-result"></span>
+        <span style="margin-left:auto;font-size:11px;color:#6c7086">Ctrl+Enter to Run • Ctrl+Shift+Enter to Submit</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// PROBLEM DATA — 3 real problems with strict test cases
+// ════════════════════════════════════════════════════════════════
+const PROBLEMS = [
+{
+  id:'prob0', title:'Two Sum', difficulty:'Easy', pts:100,
+  time:'O(n)', space:'O(n)',
+  desc:`Given an array of integers <strong>nums</strong> and an integer <strong>target</strong>,
+return the <strong>indices</strong> of the two numbers such that they add up to <strong>target</strong>.<br><br>
+You may assume exactly <strong>one solution</strong> exists. You may not use the same element twice.<br>
+Return the answer in <strong>any order</strong>.`,
+  examples:[
+    {inp:'nums = [2,7,11,15],  target = 9', out:'[0,1]', exp:'nums[0] + nums[1] = 2 + 7 = 9'},
+    {inp:'nums = [3,2,4],  target = 6',     out:'[1,2]', exp:'nums[1] + nums[2] = 2 + 4 = 6'},
+    {inp:'nums = [3,3],  target = 6',       out:'[0,1]', exp:''},
+  ],
+  constraints:['2 ≤ nums.length ≤ 10⁴','-10⁹ ≤ nums[i] ≤ 10⁹','-10⁹ ≤ target ≤ 10⁹','Exactly one valid answer exists'],
+  starters:{
+    javascript:`/**
+ * @param {number[]} nums
+ * @param {number} target
+ * @return {number[]}
+ */
+function twoSum(nums, target) {
+  // Write your solution here
+}`,
+    python:`def two_sum(nums, target):
+    # Write your solution here
+    pass`,
+    java:`class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        // Write your solution here
+        return new int[]{};
+    }
+}`
+  },
+  fnName:{javascript:'twoSum', python:'two_sum', java:'twoSum'},
+  // visible examples (3) + hidden strict cases (5)
+  visibleCases:[
+    {args:[[2,7,11,15],9],  exp:[0,1], label:'nums=[2,7,11,15], target=9'},
+    {args:[[3,2,4],6],      exp:[1,2], label:'nums=[3,2,4], target=6'},
+    {args:[[3,3],6],        exp:[0,1], label:'nums=[3,3], target=6'},
+  ],
+  hiddenCases:[
+    {args:[[-1,-2,-3,-4,-5],-8],  exp:[2,4], label:'negative nums'},
+    {args:[[0,4,3,0],0],          exp:[0,3], label:'zeros'},
+    {args:[[1,2,3,4,5],9],        exp:[3,4], label:'end of array'},
+    {args:[[100000,-100000,2,-2],0], exp:[0,1], label:'large negatives'},
+    {args:[[1],2],                exp:null,   label:'single element — no solution (edge)'},
+  ],
+  sortResult: true // sort output before comparing (order-independent)
+},
+{
+  id:'prob1', title:'Valid Parentheses', difficulty:'Medium', pts:150,
+  time:'O(n)', space:'O(n)',
+  desc:`Given a string <strong>s</strong> containing only <strong>'('</strong>, <strong>')'</strong>,
+<strong>'{'</strong>, <strong>'}'</strong>, <strong>'['</strong>, <strong>']'</strong>,
+determine if the input string is <strong>valid</strong>.<br><br>
+An input string is valid if:<br>
+1. Open brackets are closed by the <strong>same type</strong> of brackets.<br>
+2. Open brackets are closed in the <strong>correct order</strong>.<br>
+3. Every close bracket has a corresponding open bracket of the <strong>same type</strong>.`,
+  examples:[
+    {inp:'s = "()"',      out:'true',  exp:''},
+    {inp:'s = "()[]{}"',  out:'true',  exp:''},
+    {inp:'s = "(]"',      out:'false', exp:''},
+    {inp:'s = "([)]"',    out:'false', exp:'Incorrect nesting order'},
+    {inp:'s = "{[]}"',    out:'true',  exp:''},
+  ],
+  constraints:['1 ≤ s.length ≤ 10⁴',"s consists only of '()[]{}'"],
+  starters:{
+    javascript:`/**
+ * @param {string} s
+ * @return {boolean}
+ */
+function isValid(s) {
+  // Write your solution here
+}`,
+    python:`def is_valid(s):
+    # Write your solution here
+    pass`,
+    java:`class Solution {
+    public boolean isValid(String s) {
+        // Write your solution here
+        return false;
+    }
+}`
+  },
+  fnName:{javascript:'isValid', python:'is_valid', java:'isValid'},
+  visibleCases:[
+    {args:['()'],      exp:true,  label:'s="()"'},
+    {args:['()[]{}'],  exp:true,  label:'s="()[]{}"'},
+    {args:['(]'],      exp:false, label:'s="(]"'},
+    {args:['([)]'],    exp:false, label:'s="([)]"'},
+    {args:['{[]}'],    exp:true,  label:'s="{[]}"'},
+  ],
+  hiddenCases:[
+    {args:[''],        exp:true,  label:'empty string'},
+    {args:['['],       exp:false, label:'unclosed bracket'},
+    {args:[']'],       exp:false, label:'close without open'},
+    {args:['{[()]}'],  exp:true,  label:'deeply nested'},
+    {args:['(((((('],  exp:false, label:'all opens'},
+    {args:['((()))'],  exp:true,  label:'nested parens'},
+    {args:['({[]})'],  exp:true,  label:'mixed nested'},
+  ],
+  sortResult: false
+},
+{
+  id:'prob2', title:'Maximum Subarray', difficulty:'Medium', pts:150,
+  time:'O(n)', space:'O(1)',
+  desc:`Given an integer array <strong>nums</strong>, find the <strong>contiguous subarray</strong>
+with the <strong>largest sum</strong> and return <em>its sum</em>.<br><br>
+A subarray is a contiguous non-empty sequence of elements within an array.<br><br>
+<em>Follow-up: Can you solve it in O(n) using Kadane's algorithm?</em>`,
+  examples:[
+    {inp:'nums = [-2,1,-3,4,-1,2,1,-5,4]', out:'6',  exp:'Subarray [4,-1,2,1] has sum = 6'},
+    {inp:'nums = [1]',                      out:'1',  exp:'Only element'},
+    {inp:'nums = [5,4,-1,7,8]',             out:'23', exp:'Entire array [5,4,-1,7,8]'},
+  ],
+  constraints:['1 ≤ nums.length ≤ 10⁵','-10⁴ ≤ nums[i] ≤ 10⁴'],
+  starters:{
+    javascript:`/**
+ * @param {number[]} nums
+ * @return {number}
+ */
+function maxSubArray(nums) {
+  // Write your solution here
+}`,
+    python:`def max_sub_array(nums):
+    # Write your solution here
+    pass`,
+    java:`class Solution {
+    public int maxSubArray(int[] nums) {
+        // Write your solution here
+        return 0;
+    }
+}`
+  },
+  fnName:{javascript:'maxSubArray', python:'max_sub_array', java:'maxSubArray'},
+  visibleCases:[
+    {args:[[-2,1,-3,4,-1,2,1,-5,4]], exp:6,   label:'nums=[-2,1,-3,4,-1,2,1,-5,4]'},
+    {args:[[1]],                      exp:1,   label:'nums=[1]'},
+    {args:[[5,4,-1,7,8]],             exp:23,  label:'nums=[5,4,-1,7,8]'},
+  ],
+  hiddenCases:[
+    {args:[[-1]],                     exp:-1,  label:'all negative, single'},
+    {args:[[-2,-1]],                  exp:-1,  label:'all negative pick largest'},
+    {args:[[0,0,0]],                  exp:0,   label:'all zeros'},
+    {args:[[1,-1,1,-1,1]],            exp:1,   label:'alternating'},
+    {args:[[100,-1,100]],             exp:199, label:'large positives with gap'},
+    {args:[[-10000,10000]],           exp:10000,label:'min then max'},
+    {args:[[1,2,3,4,5]],              exp:15,  label:'all positive'},
+  ],
+  sortResult: false
+}
+];
+
+// ════════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════════
+let curQ = 0;
+let curTab = 'tc';
+const saved = PROBLEMS.map(p => ({...p.starters}));
+const results = [null,null,null]; // per problem: {pass,fail,total}
+let timerSec = 45*60;
+let timerHandle = null;
+
+// ════════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════════
+function init() {
+  loadQ(0);
+  initResizer();
+  startTimer();
+}
+
+// ════════════════════════════════════════════════════════════════
+// NAVIGATE
+// ════════════════════════════════════════════════════════════════
+function gotoQ(i) {
+  saveCurrent();
+  curQ = i;
+  document.querySelectorAll('.qbtn').forEach((b,j)=>b.classList.toggle('active',j===i));
+  loadQ(i);
+  setStatus('');
+  document.getElementById('submit-result').textContent = '';
+}
+
+function saveCurrent() {
+  const lang = document.getElementById('lang-sel').value;
+  saved[curQ][lang] = document.getElementById('code-area').value;
+}
+
+function loadQ(i) {
+  const p = PROBLEMS[i];
+  const lang = document.getElementById('lang-sel').value;
+
+  // left panel
+  document.getElementById('prob-idx').textContent   = `Problem ${i+1} / ${PROBLEMS.length}`;
+  document.getElementById('prob-title').textContent  = p.title;
+  document.getElementById('prob-pts').textContent    = `⭐ ${p.pts} pts`;
+  const dc = document.getElementById('prob-diff');
+  dc.textContent  = p.difficulty;
+  dc.className    = `diff-chip dc-${p.difficulty.toLowerCase()}`;
+  document.getElementById('prob-desc').innerHTML = p.desc;
+
+  document.getElementById('prob-examples').innerHTML = p.examples.map((e,n)=>`
+    <div class="ex-box">
+      <div class="ex-hdr">Example ${n+1}</div>
+      <div class="ex-line"><span class="ex-k">Input:</span><span class="ex-v">${esc(e.inp)}</span></div>
+      <div class="ex-line"><span class="ex-k">Output:</span><span class="ex-o">${esc(e.out)}</span></div>
+      ${e.exp?`<div class="ex-exp">// ${esc(e.exp)}</div>`:''}
+    </div>`).join('');
+
+  document.getElementById('prob-constraints').innerHTML =
+    p.constraints.map(c=>`<li>${esc(c)}</li>`).join('');
+
+  // right panel editor
+  const ta = document.getElementById('code-area');
+  ta.value = saved[i][lang] || p.starters[lang] || '';
+  ta.setAttribute('data-coding-name', p.id);
+  ta.setAttribute('data-language', lang);
+  ta.setAttribute('data-fn-name', p.fnName[lang] || p.fnName.javascript || '');
+  const botCases = [...p.visibleCases, ...p.hiddenCases]
+    .filter(c => c.exp !== null && c.exp !== undefined)
+    .map(c => ({ inputs: c.args, expected: c.exp, label: c.label || '' }));
+  ta.setAttribute('data-test-cases', JSON.stringify(botCases));
+  updateEditorBar(lang);
+  renderPendingCases(i);
+}
+
+function updateEditorBar(lang) {
+  const extMap = {javascript:'js',python:'py',java:'java'};
+  const lbMap  = {javascript:{bg:'#2a2200',fg:'#f9e2af',lbl:'JS'},
+                   python:    {bg:'#002233',fg:'#89dceb',lbl:'PY'},
+                   java:      {bg:'#1a0a00',fg:'#fab387',lbl:'JAVA'}};
+  document.getElementById('ed-file').textContent = `solution.${extMap[lang]||lang}`;
+  const lb = lbMap[lang]||{bg:'#313244',fg:'#cdd6f4',lbl:lang.toUpperCase()};
+  const el = document.getElementById('ed-lang');
+  el.textContent = lb.lbl;
+  el.style.cssText = `background:${lb.bg};color:${lb.fg};padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700`;
+}
+
+function changeLang() {
+  saveCurrent();
+  const lang = document.getElementById('lang-sel').value;
+  const ta   = document.getElementById('code-area');
+  ta.value   = saved[curQ][lang] || PROBLEMS[curQ].starters[lang] || '';
+  ta.setAttribute('data-language', lang);
+  updateEditorBar(lang);
+}
+
+function resetCode() {
+  const lang = document.getElementById('lang-sel').value;
+  saved[curQ][lang] = PROBLEMS[curQ].starters[lang];
+  document.getElementById('code-area').value = saved[curQ][lang];
+  renderPendingCases(curQ);
+  setStatus('');
+}
+
+// ════════════════════════════════════════════════════════════════
+// RENDER PENDING
+// ════════════════════════════════════════════════════════════════
+function renderPendingCases(qi) {
+  if (curTab !== 'tc') return;
+  const p = PROBLEMS[qi];
+  document.getElementById('console-body').innerHTML =
+    p.visibleCases.map((tc,i)=>`
+      <div class="tc">
+        <span class="tc-i">○</span>
+        <span class="tc-lbl">Case ${i+1}: ${esc(tc.label)}</span>
+        <span class="tc-exp">exp: ${JSON.stringify(tc.exp)}</span>
+      </div>`).join('') +
+    `<div style="color:#6c7086;font-size:11px;margin-top:8px;padding:4px 8px">
+      + ${p.hiddenCases.length} hidden test cases will run on Submit
+    </div>`;
+}
+
+// ════════════════════════════════════════════════════════════════
+// RUN VISIBLE TEST CASES
+// ════════════════════════════════════════════════════════════════
+function runTests() {
+  saveCurrent();
+  const lang = document.getElementById('lang-sel').value;
+  const p    = PROBLEMS[curQ];
+  const code = saved[curQ][lang];
+  showConsole('tc');
+
+  if (lang !== 'javascript') {
+    document.getElementById('console-body').innerHTML =
+      `<div style="color:#fab387;padding:8px">⚠ In-browser runner supports JavaScript only.<br>Switch to JavaScript to run tests here.</div>`;
+    return;
+  }
+
+  const fnName = p.fnName.javascript;
+  let fn;
+  try {
+    fn = new Function(code + `\nreturn typeof ${fnName}!=='undefined'?${fnName}:undefined;`)();
+  } catch(e) {
+    document.getElementById('console-body').innerHTML =
+      `<div style="color:#f38ba8;padding:8px">❌ Syntax Error: ${esc(e.message)}</div>`;
+    setStatus('❌ Compile error');
+    return;
+  }
+  if (typeof fn !== 'function') {
+    document.getElementById('console-body').innerHTML =
+      `<div style="color:#f38ba8;padding:8px">❌ Function <code>${fnName}</code> not found.</div>`;
+    return;
+  }
+
+  let pass=0, fail=0;
+  const rows = p.visibleCases.map((tc,i)=>{
+    if (tc.exp === null) {
+      return `<div class="tc run"><span class="tc-i">⚪</span><span class="tc-lbl">Case ${i+1}: ${esc(tc.label)} — edge case, skipped</span></div>`;
+    }
+    try {
+      const got   = fn(...tc.args);
+      const gotN  = p.sortResult && Array.isArray(got) ? [...got].sort((a,b)=>a-b) : got;
+      const expN  = p.sortResult && Array.isArray(tc.exp)  ? [...tc.exp].sort((a,b)=>a-b) : tc.exp;
+      const ok    = JSON.stringify(gotN) === JSON.stringify(expN);
+      if(ok) pass++; else fail++;
+      return `<div class="tc ${ok?'pass':'fail'}">
+        <span class="tc-i">${ok?'✅':'❌'}</span>
+        <span class="tc-lbl">Case ${i+1}: ${esc(tc.label)}</span>
+        <span class="${ok?'tc-exp':'tc-got'}">got: ${esc(JSON.stringify(gotN))}</span>
+        <span class="tc-exp">exp: ${esc(JSON.stringify(expN))}</span>
+      </div>
+      <div class="tc-detail">
+        <div class="td-row"><span class="td-k">Input:</span><span class="td-v">${esc(JSON.stringify(tc.args))}</span></div>
+        <div class="td-row"><span class="td-k">Expected:</span><span class="td-v ok">${esc(JSON.stringify(expN))}</span></div>
+        <div class="td-row"><span class="td-k">Got:</span><span class="td-v ${ok?'ok':'bad'}">${esc(JSON.stringify(gotN))}</span></div>
+      </div>`;
+    } catch(e) {
+      fail++;
+      return `<div class="tc fail"><span class="tc-i">❌</span><span class="tc-lbl">Case ${i+1}: Runtime — ${esc(e.message)}</span></div>`;
+    }
+  });
+
+  const total = p.visibleCases.filter(t=>t.exp!==null).length;
+  const col   = fail===0?'#a6e3a1':'#f38ba8';
+  rows.push(`<div style="color:${col};font-weight:700;padding:6px 8px;font-size:12px;margin-top:4px">${pass}/${total} visible cases passed</div>`);
+  rows.push(`<div style="color:#6c7086;font-size:11px;padding:2px 8px">Submit to run all ${p.hiddenCases.length} hidden cases</div>`);
+  document.getElementById('console-body').innerHTML = rows.join('');
+  setStatus(fail===0 ? `✅ ${pass}/${total} passed` : `❌ ${fail} failed`);
+}
+
+// ════════════════════════════════════════════════════════════════
+// SUBMIT — runs ALL cases including hidden
+// ════════════════════════════════════════════════════════════════
+function submitAll() {
+  saveCurrent();
+  const lang = document.getElementById('lang-sel').value;
+  const p    = PROBLEMS[curQ];
+  const code = saved[curQ][lang];
+  showConsole('tc');
+
+  if (lang !== 'javascript') {
+    document.getElementById('submit-result').innerHTML =
+      `<span style="color:#fab387">⚠ JS only for in-browser submit</span>`;
+    return;
+  }
+
+  const fnName = p.fnName.javascript;
+  let fn;
+  try {
+    fn = new Function(code + `\nreturn typeof ${fnName}!=='undefined'?${fnName}:undefined;`)();
+  } catch(e) {
+    document.getElementById('submit-result').innerHTML =
+      `<span style="color:#f38ba8">❌ Compile Error</span>`;
+    return;
+  }
+
+  const allCases = [...p.visibleCases, ...p.hiddenCases];
+  let pass=0, fail=0, skip=0;
+  const rows = allCases.map((tc,i)=>{
+    const label = i < p.visibleCases.length ? `Visible ${i+1}` : `Hidden ${i-p.visibleCases.length+1}`;
+    if (tc.exp === null) { skip++; return `<div class="tc run"><span class="tc-i">⚪</span><span class="tc-lbl">${label}: ${esc(tc.label)} — edge/skip</span></div>`; }
+    try {
+      const got  = fn(...tc.args);
+      const gotN = p.sortResult && Array.isArray(got) ? [...got].sort((a,b)=>a-b) : got;
+      const expN = p.sortResult && Array.isArray(tc.exp) ? [...tc.exp].sort((a,b)=>a-b) : tc.exp;
+      const ok   = JSON.stringify(gotN) === JSON.stringify(expN);
+      if(ok) pass++; else fail++;
+      return `<div class="tc ${ok?'pass':'fail'}">
+        <span class="tc-i">${ok?'✅':'❌'}</span>
+        <span class="tc-lbl">${label}: ${esc(tc.label)}</span>
+        <span class="${ok?'tc-exp':'tc-got'}">got: ${esc(JSON.stringify(gotN))}</span>
+        <span class="tc-exp">exp: ${esc(JSON.stringify(expN))}</span>
+      </div>`;
+    } catch(e) {
+      fail++;
+      return `<div class="tc fail"><span class="tc-i">❌</span><span class="tc-lbl">${label}: ${esc(tc.label)} — ${esc(e.message)}</span></div>`;
+    }
+  });
+
+  const total   = allCases.filter(t=>t.exp!==null).length;
+  const pct     = Math.round(pass/total*100);
+  const allPass = fail===0;
+  const col     = allPass?'#a6e3a1':'#f38ba8';
+  rows.push(`<div style="color:${col};font-weight:700;font-size:13px;padding:8px 8px 4px">
+    ${allPass?'🎉 Accepted':'❌ Wrong Answer'} — ${pass}/${total} (${pct}%) test cases passed
+  </div>`);
+  document.getElementById('console-body').innerHTML = rows.join('');
+
+  results[curQ] = {pass, fail, total, pct};
+  updateTopBadge(curQ, allPass ? 'pass' : 'fail');
+
+  const sr = document.getElementById('submit-result');
+  sr.innerHTML = allPass
+    ? `<span style="color:#a6e3a1;font-weight:700">✅ Accepted — ${pct}%</span>`
+    : `<span style="color:#f38ba8;font-weight:700">❌ Wrong Answer — ${pass}/${total}</span>`;
+}
+
+function updateTopBadge(i, state) {
+  const el = document.getElementById(`qbadge${i}`);
+  if (!el) return;
+  if (state==='pass') { el.className='q-badge b-pass'; el.textContent='✓'; }
+  else               { el.className='q-badge b-fail'; el.textContent='✗'; }
+}
+
+// ════════════════════════════════════════════════════════════════
+// CONSOLE TABS
+// ════════════════════════════════════════════════════════════════
+function showConsole(tab) {
+  curTab = tab;
+  document.getElementById('ctab-tc').classList.toggle('on',  tab==='tc');
+  document.getElementById('ctab-out').classList.toggle('on', tab==='out');
+  if (tab === 'out') {
+    document.getElementById('console-body').innerHTML =
+      '<div style="color:#6c7086;padding:8px">Click ▶ Run to execute your code.</div>';
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// STATUS LINE
+// ════════════════════════════════════════════════════════════════
+function setStatus(msg) {
+  document.getElementById('run-status').textContent = msg;
+}
+
+// ════════════════════════════════════════════════════════════════
+// TIMER
+// ════════════════════════════════════════════════════════════════
+function startTimer() {
+  timerHandle = setInterval(()=>{
+    if (timerSec <= 0) { clearInterval(timerHandle); document.getElementById('timer').textContent='00:00'; return; }
+    timerSec--;
+    const m = String(Math.floor(timerSec/60)).padStart(2,'0');
+    const s = String(timerSec%60).padStart(2,'0');
+    const el = document.getElementById('timer');
+    el.textContent = `${m}:${s}`;
+    el.style.color = timerSec < 300 ? '#f38ba8' : timerSec < 600 ? '#f9e2af' : '#a6e3a1';
+  }, 1000);
+}
+
+// ════════════════════════════════════════════════════════════════
+// RESIZER
+// ════════════════════════════════════════════════════════════════
+function initResizer() {
+  const rz = document.getElementById('resizer');
+  const lp = document.getElementById('left');
+  let drag=false, sx=0, sw=0;
+  rz.addEventListener('mousedown', e=>{drag=true;sx=e.clientX;sw=lp.getBoundingClientRect().width;rz.classList.add('drag');document.body.style.userSelect='none';});
+  document.addEventListener('mousemove', e=>{
+    if(!drag) return;
+    lp.style.width = Math.max(220,Math.min(sw+e.clientX-sx,window.innerWidth-260))+'px';
+  });
+  document.addEventListener('mouseup', ()=>{drag=false;rz.classList.remove('drag');document.body.style.userSelect='';});
+}
+
+// ════════════════════════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════════════════════════
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ════════════════════════════════════════════════════════════════
+// KEYBOARD
+// ════════════════════════════════════════════════════════════════
+document.addEventListener('keydown', e=>{
+  if ((e.ctrlKey||e.metaKey) && e.shiftKey && e.key==='Enter'){e.preventDefault();submitAll();}
+  else if ((e.ctrlKey||e.metaKey) && e.key==='Enter'){e.preventDefault();runTests();}
+});
+
+init();
+</script>
+</body>
+</html>

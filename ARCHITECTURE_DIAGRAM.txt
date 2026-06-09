@@ -1,0 +1,375 @@
+================================================================================
+             COMPLETE MCQ EXTENSION - SYSTEM ARCHITECTURE
+================================================================================
+
+LAYER 1: USER INTERFACE (UI DASHBOARD)
+┌──────────────────────────────────────────────────────────────────────────┐
+│  ┌─────────────────────────────────────────────────────────────────────┐ │
+│  │                    MCQ ASSISTANT DASHBOARD                         │ │
+│  ├─────────────────────────────────────────────────────────────────────┤ │
+│  │  Chat Tab              Answers Tab           Settings Tab          │ │
+│  │  ┌──────────────┐     ┌──────────────┐     ┌──────────────────┐   │ │
+│  │  │ 💬 Messages  │     │ ✓ Answer #1  │     │ Auto-send ☑      │   │ │
+│  │  │ System: sent │     │ ✓ Answer #2  │     │ Auto-apply ☑     │   │ │
+│  │  │ User: ready  │     │ ○ Answer #3  │     │ Notifications ☑  │   │ │
+│  │  │              │     │              │     │ WhatsApp: +1... │   │ │
+│  │  │ Screenshot ▼ │     │ Stats:       │     │ [Save Settings]  │   │ │
+│  │  │ Clear Chat   │     │ Q: 3 / A: 2  │     │                  │   │ │
+│  │  │              │     │ Success: 67% │     │ v1.0              │   │ │
+│  │  └──────────────┘     └──────────────┘     └──────────────────┘   │ │
+│  └─────────────────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────────────────┘
+                                    ▲
+                                    │ Events & Updates
+                                    │
+
+
+LAYER 2: ORCHESTRATOR (Main Coordinator)
+┌──────────────────────────────────────────────────────────────────────────┐
+│  ┌────────────────────── MCQ ORCHESTRATOR ───────────────────────────┐  │
+│  │  Main Coordinator                                                 │  │
+│  │  - startSession()       → Create conversation                     │  │
+│  │  - captureAndSend()     → Screenshot + WhatsApp                   │  │
+│  │  - receiveAnswer()      → Parse message + store answers           │  │
+│  │  - applyAnswers()       → Auto-click options                      │  │
+│  │  - getHistory()         → Retrieve data                           │  │
+│  │  - getStats()           → Calculate statistics                    │  │
+│  │  - on/emit/off          → Event system                            │  │
+│  └────────────────────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────────────────────┘
+         ▲                ▲                 ▲                  ▲
+         │                │                 │                  │
+    Orchestrates all core modules
+
+
+LAYER 3: CORE MODULES (6 Specialized Modules)
+┌──────────────────────────────────────────────────────────────────────────┐
+│                                                                          │
+│  ┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐    │
+│  │  STORAGE MODULE  │   │ WHATSAPP MODULE  │   │ SCREENSHOT MODUL │    │
+│  ├──────────────────┤   ├──────────────────┤   ├──────────────────┤    │
+│  │ IndexedDB        │   │ Twilio API       │   │ Canvas Capture   │    │
+│  │ ┌──────────────┐ │   │ ┌──────────────┐ │   │ ┌──────────────┐ │    │
+│  │ │Conversations │ │   │ │Queue Manager │ │   │ │Auto-Detect   │ │    │
+│  │ │Messages      │ │   │ │Send Message  │ │   │ │Compression   │ │    │
+│  │ │Answers       │ │   │ │Parse Answers │ │   │ │Validation    │ │    │
+│  │ │Screenshots   │ │   │ │Retry Logic   │ │   │ │Metadata      │ │    │
+│  │ │History       │ │   │ │Backoff       │ │   │ │Extraction    │ │    │
+│  │ └──────────────┘ │   │ └──────────────┘ │   │ └──────────────┘ │    │
+│  └──────────────────┘   └──────────────────┘   └──────────────────┘    │
+│                                                                          │
+│  ┌──────────────────┐   ┌──────────────────┐                            │
+│  │AUTO-ANSWER MODULE│   │UI DASHBOARD MODUL│                            │
+│  ├──────────────────┤   ├──────────────────┤                            │
+│  │DOM Manipulation  │   │React-like Render │                            │
+│  │ ┌──────────────┐ │   │ ┌──────────────┐ │                            │
+│  │ │Find Question │ │   │ │Render Tabs   │ │                            │
+│  │ │Find Option   │ │   │ │Update Stats  │ │                            │
+│  │ │Click/Select  │ │   │ │Message Relay │ │                            │
+│  │ │Visual Feedback│ │   │ │Event Binding │ │                            │
+│  │ │Verify Select │ │   │ │Style Control │ │                            │
+│  │ └──────────────┘ │   │ └──────────────┘ │                            │
+│  └──────────────────┘   └──────────────────┘                            │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+
+LAYER 4: EXTENSION SCRIPTS (Content Script & Service Worker)
+┌──────────────────────────────────────────────────────────────────────────┐
+│                                                                          │
+│  ┌─────────────────────────┐   ┌──────────────────────────────────┐    │
+│  │   CONTENT SCRIPT (v2)    │   │ BACKGROUND SERVICE WORKER (v2)  │    │
+│  ├─────────────────────────┤   ├──────────────────────────────────┤    │
+│  │ Injected into pages     │   │ Persistent background process    │    │
+│  │ ┌─────────────────────┐ │   │ ┌──────────────────────────────┐ │    │
+│  │ │Load all modules     │ │   │ │Tab lifecycle management      │ │    │
+│  │ │Initialize          │ │   │ │Script injection              │ │    │
+│  │ │Create UI Dashboard  │ │   │ │Message routing               │ │    │
+│  │ │Keyboard shortcuts   │ │   │ │WhatsApp webhook handler      │ │    │
+│  │ │Floating button      │ │   │ │Broadcast to all tabs         │ │    │
+│  │ │MCQ detection        │ │   │ │Alarm scheduling              │ │    │
+│  │ │Settings loading     │ │   │ │Storage event listener        │ │    │
+│  │ └─────────────────────┘ │   │ └──────────────────────────────┘ │    │
+│  └─────────────────────────┘   └──────────────────────────────────┘    │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+
+LAYER 5: EXTERNAL SERVICES (Outside Chrome Extension)
+┌──────────────────────────────────────────────────────────────────────────┐
+│                                                                          │
+│  ┌──────────────────────────┐   ┌──────────────────────────────────┐   │
+│  │  YOUR BACKEND SERVER     │   │    TWILIO WHATSAPP API           │   │
+│  │  (Flask/Node.js)         │   │                                  │   │
+│  ├──────────────────────────┤   ├──────────────────────────────────┤   │
+│  │ POST /api/whatsapp/send  │   │ Sends WhatsApp messages          │   │
+│  │   → Forward to Twilio    │◄──┤ Sends media (images)             │   │
+│  │                          │   │ Receives user replies            │   │
+│  │ POST /webhook/whatsapp   │   │                                  │   │
+│  │   ← Receive message      │   └─────────────────────────────────┘   │
+│  │   ← Parse answers        │            ▲                           │
+│  │   → Relay to extension   │            │                           │
+│  │                          │    User sends WhatsApp reply            │
+│  │ GET /api/whatsapp/status │            │                           │
+│  │   → Check delivery       │            │                           │
+│  │                          │    Q1: A                               │
+│  │ GET /health              │    Q2: B                               │
+│  │   → Check health         │    Q3: C                               │
+│  └──────────────────────────┘                                        │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+
+DATA FLOW DIAGRAM
+================================================================================
+
+USER ACTION: Click "Take Screenshot"
+     │
+     ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│ Content Script receives click event                                     │
+│ → Calls orchestrator.captureAndSend()                                   │
+└──────────────────────────────┬────────────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│ Screenshot Module captures MCQ area                                     │
+│ → screenshot.captureScreenshot()                                        │
+│ → Returns: {dataUrl, size, width, height, metadata}                     │
+└──────────────────────────────┬────────────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│ Storage Module stores screenshot                                        │
+│ → storage.storeScreenshot(conversationId, screenshot)                   │
+│ → Saved in IndexedDB                                                    │
+└──────────────────────────────┬────────────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│ WhatsApp Module sends to Twilio                                         │
+│ → whatsapp.sendScreenshot(screenshot, conversationData)                 │
+│ → POST to backend /api/whatsapp/send                                    │
+│ → Backend forwards to Twilio API                                        │
+└──────────────────────────────┬────────────────────────────────────────────┘
+                               │
+                               ▼
+                        Twilio sends image
+                          to WhatsApp
+                        (User receives in
+                         WhatsApp chat)
+                               │
+                               ▼
+                         User sends reply:
+                         "Q1: A\nQ2: B..."
+
+
+USER ACTION: User replies on WhatsApp
+     │
+     ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│ Twilio receives message                                                 │
+│ → Calls backend webhook POST /webhook/whatsapp                          │
+└──────────────────────────────┬────────────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│ Backend parses answer format                                            │
+│ → parse_answers("Q1: A\nQ2: B...")                                      │
+│ → Returns: [{questionIndex: 0, answer: 'A'}, ...]                       │
+└──────────────────────────────┬────────────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│ Backend relays to extension                                             │
+│ → Sends via WebSocket/Firebase/Redis Pub-Sub                            │
+│ → Or calls chrome.runtime.sendMessage()                                 │
+└──────────────────────────────┬────────────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│ Background Service Worker receives message                              │
+│ → Routes to content script on MCQ page                                  │
+│ → chrome.tabs.sendMessage()                                             │
+└──────────────────────────────┬────────────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│ Content Script receives answer                                          │
+│ → Calls orchestrator.receiveAnswer(messageData)                         │
+└──────────────────────────────┬────────────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│ Orchestrator parses and stores answers                                  │
+│ → storage.storeAnswer(conversationId, answerData)                       │
+│ → Saved in IndexedDB answers table                                      │
+└──────────────────────────────┬────────────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│ Auto-Answer Module applies answers                                      │
+│ → autoAnswer.applyAnswers(answers)                                      │
+│ → For each answer:                                                      │
+│     • Find question by index                                            │
+│     • Find option by letter (A, B, C, D)                                │
+│     • Click/select option                                               │
+│     • Verify selection                                                  │
+│     • Add visual feedback (green highlight)                             │
+└──────────────────────────────┬────────────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│ UI Dashboard updates                                                    │
+│ → uiDashboard.updateAnswersTab()                                        │
+│ → Display: Answers list with checkmarks                                 │
+│ → Display: Statistics (Q: 3, A: 3, Applied: 3, Success: 100%)           │
+└──────────────────────────────┬────────────────────────────────────────────┘
+                               │
+                               ▼
+                          ✅ COMPLETE!
+
+
+STORAGE SCHEMA (IndexedDB)
+================================================================================
+
+conversations
+{
+  id: "uuid",
+  url: "https://exam.com",
+  title: "Math Quiz",
+  timestamp: 1620000000000,
+  status: "active",
+  questionCount: 50,
+  answeredCount: 3,
+  appliedCount: 3,
+  metadata: {...}
+}
+
+messages
+{
+  id: "uuid",
+  conversationId: "uuid",
+  type: "screenshot|answer|system|error",
+  content: "text or base64 data",
+  timestamp: 1620000000000,
+  status: "sent|delivered|failed",
+  whatsappId: "SM...",
+  senderType: "user|bot|extension"
+}
+
+answers
+{
+  id: "uuid",
+  conversationId: "uuid",
+  questionIndex: 0,
+  questionText: "What is...?",
+  selectedOption: "A",
+  selectedIndex: 0,
+  confidence: 0.9,
+  timestamp: 1620000000000,
+  applied: true,
+  appliedAt: 1620000001000,
+  messageId: "uuid"
+}
+
+screenshots
+{
+  id: "uuid",
+  conversationId: "uuid",
+  dataUrl: "data:image/jpeg;base64,...",
+  size: 102400,
+  timestamp: 1620000000000,
+  metadata: {...}
+}
+
+history (Activity Log)
+{
+  id: "uuid",
+  timestamp: 1620000000000,
+  action: "screenshot|send|receive|apply",
+  details: {...},
+  url: "https://exam.com",
+  conversationId: "uuid",
+  success: true
+}
+
+
+EVENT FLOW (Event System)
+================================================================================
+
+Orchestrator Events:
+  ├─ sessionStarted(data)      → Conversation created
+  ├─ screenshotSent(data)      → Image sent to WhatsApp
+  ├─ answerReceived(data)      → Message from WhatsApp received
+  ├─ answersApplied(data)      → Options clicked on page
+  ├─ conversationCleared(data) → Data cleared
+  └─ error(error)              → Error occurred
+
+UI Dashboard Listeners:
+  ├─ on('sessionStarted')      → Display "Session started"
+  ├─ on('screenshotSent')      → Display "Screenshot sent ✓"
+  ├─ on('answerReceived')      → Display "Answers received"
+  ├─ on('answersApplied')      → Update stats, highlight answers
+  └─ on('error')               → Display error message
+
+
+KEYBOARD SHORTCUTS
+================================================================================
+
+Ctrl+Shift+M → Take screenshot & send to WhatsApp
+Ctrl+Shift+H → Toggle dashboard visibility
+
+
+PERMISSIONS REQUIRED (manifest.json)
+================================================================================
+
+Chrome API Permissions:
+  ├─ activeTab          → Access current tab
+  ├─ storage            → Save/load settings
+  ├─ scripting          → Execute code
+  ├─ tabs               → Tab management
+  ├─ webNavigation      → Monitor navigation
+  ├─ tabCapture         → Capture screenshots (future)
+  ├─ alarms             → Schedule periodic tasks
+  ├─ notifications      → Show notifications
+  └─ declarativeNetRequest → Network control
+
+Host Permissions:
+  └─ <all_urls>         → Access any website
+
+
+TESTING FLOW
+================================================================================
+
+1. Load Extension
+   └─ Open chrome://extensions
+      └─ Click "Load unpacked"
+      └─ Select extension folder
+
+2. Navigate to MCQ Website
+   └─ Go to exam.com or quiz site
+   └─ See floating button + dashboard
+
+3. Take Screenshot
+   └─ Click "📸 Take Screenshot" button
+   └─ Image captured
+   └─ Message shows "Waiting for answer..."
+
+4. Send WhatsApp Reply
+   └─ Send from WhatsApp: "Q1: A\nQ2: B..."
+   └─ Extension receives message
+
+5. Auto-Select
+   └─ Options highlighted in green
+   └─ Dashboard updates with stats
+
+6. Verify
+   └─ All answers applied correctly
+   └─ Success rate: 100%
+   └─ Clear to reset
+
+
+================================================================================
+                         ARCHITECTURE COMPLETE ✓
+================================================================================

@@ -1,0 +1,211 @@
+ERROR:app:GOOGLE_APPLICATION_CREDENTIALS not set in .env
+WARNING:app:GEMINI_API_KEY not set in .env (Gemini fallback will not work)
+WARNING:app:GEMINI_API_URL not set in .env (Gemini fallback will not work)
+WARNING:app:GPT4V_API_KEY not set in .env (GPT-4 Vision fallback will not work)
+WARNING:app:GPT4V_API_URL not set in .env (GPT-4 Vision fallback will not work)
+WARNING:app:HUGGINGFACE_API_KEY not set in .env (Hugging Face API key will not work)
+WARNING:app:GOOGLE_SEARCH_API_KEY not set in .env (Google Search API key will not work)
+WARNING:app:GOOGLE_SEARCH_CX not set in .env (Google Search CX will not work)
+Starting MCQ Automation Bot Server...
+==================================================
+Backend URL: http://localhost:5000
+Frontend URL: Open frontend/index.html in your browser
+==================================================
+[OK] All required packages are installed
+[OK] ChromeDriver is available
+ * Serving Flask app 'app'
+ * Debug mode: on
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.0.181:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug: * Restarting with stat
+ERROR:app:GOOGLE_APPLICATION_CREDENTIALS not set in .env
+WARNING:app:GEMINI_API_KEY not set in .env (Gemini fallback will not work)
+WARNING:app:GEMINI_API_URL not set in .env (Gemini fallback will not work)
+WARNING:app:GPT4V_API_KEY not set in .env (GPT-4 Vision fallback will not work)
+WARNING:app:GPT4V_API_URL not set in .env (GPT-4 Vision fallback will not work)
+WARNING:app:HUGGINGFACE_API_KEY not set in .env (Hugging Face API key will not work)
+WARNING:app:GOOGLE_SEARCH_API_KEY not set in .env (Google Search API key will not work)
+WARNING:app:GOOGLE_SEARCH_CX not set in .env (Google Search CX will not work)
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 510-750-360
+INFO:werkzeug: * Detected change in 'c:\\Users\\krant\\Downloads\\b_lfJWY8zj8u2\\backend\\app.py', reloading
+Starting MCQ Automation Bot Server...
+==================================================
+Backend URL: http://localhost:5000
+Frontend URL: Open frontend/index.html in your browser
+==================================================
+[OK] All required packages are installed
+[OK] ChromeDriver is available
+Exception in thread Thread-3 (serve_forever):
+Traceback (most recent call last):
+  File "D:\programms\python\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\programms\python\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\programms\python\Lib\site-packages\werkzeug\serving.py", line 820, in serve_forever
+    super().serve_forever(poll_interval=poll_interval)
+  File "D:\programms\python\Lib\socketserver.py", line 233, in serve_forever
+    ready = selector.select(poll_interval)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\programms\python\Lib\selectors.py", line 323, in select
+    r, w, _ = self._select(self._readers, self._writers, [], timeout)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\programms\python\Lib\selectors.py", line 314, in _select
+    r, w, x = select.select(r, w, w, timeout)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10038] An operation was attempted on something that is not a socket
+INFO:werkzeug: * Restarting with stat
+ERROR:app:GOOGLE_APPLICATION_CREDENTIALS not set in .env
+WARNING:app:GEMINI_API_KEY not set in .env (Gemini fallback will not work)
+WARNING:app:GEMINI_API_URL not set in .env (Gemini fallback will not work)
+WARNING:app:GPT4V_API_KEY not set in .env (GPT-4 Vision fallback will not work)
+WARNING:app:GPT4V_API_URL not set in .env (GPT-4 Vision fallback will not work)
+WARNING:app:HUGGINGFACE_API_KEY not set in .env (Hugging Face API key will not work)
+WARNING:app:GOOGLE_SEARCH_API_KEY not set in .env (Google Search API key will not work)
+WARNING:app:GOOGLE_SEARCH_CX not set in .env (Google Search CX will not work)
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 510-750-360
+INFO:werkzeug: * Detected change in 'c:\\Users\\krant\\Downloads\\b_lfJWY8zj8u2\\backend\\app.py', reloading
+Starting MCQ Automation Bot Server...
+==================================================
+Backend URL: http://localhost:5000
+Frontend URL: Open frontend/index.html in your browser
+==================================================
+[OK] All required packages are installed
+[OK] ChromeDriver is available
+Exception in thread Thread-3 (serve_forever):
+Traceback (most recent call last):
+  File "D:\programms\python\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\programms\python\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\programms\python\Lib\site-packages\werkzeug\serving.py", line 820, in serve_forever
+    super().serve_forever(poll_interval=poll_interval)
+  File "D:\programms\python\Lib\socketserver.py", line 233, in serve_forever
+    ready = selector.select(poll_interval)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\programms\python\Lib\selectors.py", line 323, in select
+    r, w, _ = self._select(self._readers, self._writers, [], timeout)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\programms\python\Lib\selectors.py", line 314, in _select
+    r, w, x = select.select(r, w, w, timeout)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10038] An operation was attempted on something that is not a socket
+INFO:werkzeug: * Restarting with stat
+ERROR:app:GOOGLE_APPLICATION_CREDENTIALS not set in .env
+WARNING:app:GEMINI_API_KEY not set in .env (Gemini fallback will not work)
+WARNING:app:GEMINI_API_URL not set in .env (Gemini fallback will not work)
+WARNING:app:GPT4V_API_KEY not set in .env (GPT-4 Vision fallback will not work)
+WARNING:app:GPT4V_API_URL not set in .env (GPT-4 Vision fallback will not work)
+WARNING:app:HUGGINGFACE_API_KEY not set in .env (Hugging Face API key will not work)
+WARNING:app:GOOGLE_SEARCH_API_KEY not set in .env (Google Search API key will not work)
+WARNING:app:GOOGLE_SEARCH_CX not set in .env (Google Search CX will not work)
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 510-750-360
+INFO:werkzeug: * Detected change in 'c:\\Users\\krant\\Downloads\\b_lfJWY8zj8u2\\backend\\app.py', reloading
+Starting MCQ Automation Bot Server...
+==================================================
+Backend URL: http://localhost:5000
+Frontend URL: Open frontend/index.html in your browser
+==================================================
+[OK] All required packages are installed
+[OK] ChromeDriver is available
+Exception in thread Thread-3 (serve_forever):
+Traceback (most recent call last):
+  File "D:\programms\python\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\programms\python\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\programms\python\Lib\site-packages\werkzeug\serving.py", line 820, in serve_forever
+    super().serve_forever(poll_interval=poll_interval)
+  File "D:\programms\python\Lib\socketserver.py", line 233, in serve_forever
+    ready = selector.select(poll_interval)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\programms\python\Lib\selectors.py", line 323, in select
+    r, w, _ = self._select(self._readers, self._writers, [], timeout)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\programms\python\Lib\selectors.py", line 314, in _select
+    r, w, x = select.select(r, w, w, timeout)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10038] An operation was attempted on something that is not a socket
+INFO:werkzeug: * Restarting with stat
+ERROR:app:GOOGLE_APPLICATION_CREDENTIALS not set in .env
+WARNING:app:GEMINI_API_KEY not set in .env (Gemini fallback will not work)
+WARNING:app:GEMINI_API_URL not set in .env (Gemini fallback will not work)
+WARNING:app:GPT4V_API_KEY not set in .env (GPT-4 Vision fallback will not work)
+WARNING:app:GPT4V_API_URL not set in .env (GPT-4 Vision fallback will not work)
+WARNING:app:HUGGINGFACE_API_KEY not set in .env (Hugging Face API key will not work)
+WARNING:app:GOOGLE_SEARCH_API_KEY not set in .env (Google Search API key will not work)
+WARNING:app:GOOGLE_SEARCH_CX not set in .env (Google Search CX will not work)
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 510-750-360
+INFO:werkzeug: * Detected change in 'c:\\Users\\krant\\Downloads\\b_lfJWY8zj8u2\\backend\\app.py', reloading
+Starting MCQ Automation Bot Server...
+==================================================
+Backend URL: http://localhost:5000
+Frontend URL: Open frontend/index.html in your browser
+==================================================
+[OK] All required packages are installed
+[OK] ChromeDriver is available
+Exception in thread Thread-3 (serve_forever):
+Traceback (most recent call last):
+  File "D:\programms\python\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\programms\python\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\programms\python\Lib\site-packages\werkzeug\serving.py", line 820, in serve_forever
+    super().serve_forever(poll_interval=poll_interval)
+  File "D:\programms\python\Lib\socketserver.py", line 233, in serve_forever
+    ready = selector.select(poll_interval)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\programms\python\Lib\selectors.py", line 323, in select
+    r, w, _ = self._select(self._readers, self._writers, [], timeout)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\programms\python\Lib\selectors.py", line 314, in _select
+    r, w, x = select.select(r, w, w, timeout)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [WinError 10038] An operation was attempted on something that is not a socket
+INFO:werkzeug: * Restarting with stat
+ERROR:app:GOOGLE_APPLICATION_CREDENTIALS not set in .env
+WARNING:app:GEMINI_API_KEY not set in .env (Gemini fallback will not work)
+WARNING:app:GEMINI_API_URL not set in .env (Gemini fallback will not work)
+WARNING:app:GPT4V_API_KEY not set in .env (GPT-4 Vision fallback will not work)
+WARNING:app:GPT4V_API_URL not set in .env (GPT-4 Vision fallback will not work)
+WARNING:app:HUGGINGFACE_API_KEY not set in .env (Hugging Face API key will not work)
+WARNING:app:GOOGLE_SEARCH_API_KEY not set in .env (Google Search API key will not work)
+WARNING:app:GOOGLE_SEARCH_CX not set in .env (Google Search CX will not work)
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 510-750-360
+INFO:werkzeug:127.0.0.1 - - [06/May/2026 09:39:25] "[33mOPTIONS /api/whatsapp/send HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [06/May/2026 09:39:27] "[33mOPTIONS /api/whatsapp/send HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [06/May/2026 09:39:55] "[33mOPTIONS /api/whatsapp/send HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [06/May/2026 09:39:57] "[33mOPTIONS /api/whatsapp/send HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [06/May/2026 09:39:58] "GET /api/health HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [06/May/2026 09:40:02] "[33mOPTIONS /api/whatsapp/send HTTP/1.1[0m" 404 -
+INFO:werkzeug:127.0.0.1 - - [06/May/2026 09:40:09] "POST /api/setup HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [06/May/2026 09:40:18] "POST /api/detect-mcqs HTTP/1.1" 200 -
+INFO:app:Found 1 MCQs
+INFO:app:Processing MCQ 1: 1. What is the capital of France?...
+ERROR:app:Google Search API key or CX not set.
+INFO:werkzeug:127.0.0.1 - - [06/May/2026 09:40:29] "POST /api/process-mcqs HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [06/May/2026 09:42:26] "GET /api/health HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [06/May/2026 09:42:41] "POST /api/setup HTTP/1.1" 200 -
+ERROR:app:AI answer error (openai): OpenAI client not initialized
+INFO:werkzeug:127.0.0.1 - - [06/May/2026 09:42:41] "POST /api/answer HTTP/1.1" 200 -
+INFO:app:Found 1 MCQs
+INFO:app:Processing MCQ 1: 1. What is the capital of France?...
+ERROR:app:AI answer error (openai): OpenAI client not initialized
+INFO:werkzeug:127.0.0.1 - - [06/May/2026 09:42:50] "POST /api/process-mcqs HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [06/May/2026 09:43:52] "POST /api/setup HTTP/1.1" 200 -
+ERROR:app:AI answer error (openai): OpenAI client not initialized
+INFO:werkzeug:127.0.0.1 - - [06/May/2026 09:43:52] "POST /api/answer HTTP/1.1" 200 -
+INFO:app:Found 1 MCQs
+INFO:app:Processing MCQ 1: 1. What is the capital of France?...
+ERROR:app:AI answer error (openai): OpenAI client not initialized
+INFO:werkzeug:127.0.0.1 - - [06/May/2026 09:44:00] "POST /api/process-mcqs HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [06/May/2026 09:45:02] "POST /api/setup HTTP/1.1" 200 -
+ERROR:app:AI answer error (openai): OpenAI client not initialized
+INFO:werkzeug:127.0.0.1 - - [06/May/2026 09:45:02] "POST /api/answer HTTP/1.1" 200 -

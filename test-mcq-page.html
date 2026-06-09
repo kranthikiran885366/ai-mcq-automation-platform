@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MCQ Bot — Exam Simulator (14 Questions)</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f0f2f5; min-height: 100vh; }
+
+    #header {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff; padding: 12px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,.25);
+      position: sticky; top: 0; z-index: 100;
+    }
+    #header h1 { font-size: 17px; font-weight: 700; }
+    #header-right { display: flex; gap: 8px; align-items: center; }
+    .hbtn { padding: 6px 14px; border: none; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; transition: .15s; }
+    #btn-fs  { background: #fff; color: #764ba2; }
+    #btn-efs { background: #e53935; color: #fff; display: none; }
+    #btn-fs:hover  { background: #ede7f6; }
+    #btn-efs:hover { background: #b71c1c; }
+
+    #progress-wrap { background: rgba(255,255,255,.25); height: 5px; margin: 0; }
+    #progress-bar  { height: 5px; background: #fff; transition: width .4s ease; }
+
+    #exam-shell { max-width: 720px; margin: 32px auto; padding: 0 16px 60px; }
+
+    #meta-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; font-size: 13px; color: #666; }
+    #q-counter { font-weight: 700; color: #444; }
+    .fmt-badge { font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: .5px; }
+    .f-radio    { background:#e8f0fe; color:#3949ab; }
+    .f-checkbox { background:#e8f5e9; color:#2e7d32; }
+    .f-fieldset { background:#e3f2fd; color:#1565c0; }
+    .f-bare     { background:#e0f7fa; color:#00695c; }
+    .f-select   { background:#f3e5f5; color:#6a1b9a; }
+    .f-role     { background:#fce4ec; color:#880e4f; }
+    .f-button   { background:#fff8e1; color:#e65100; }
+    .f-table    { background:#ede7f6; color:#4527a0; }
+    .f-divopt   { background:#fff3e0; color:#bf360c; }
+    .f-dataattr { background:#e8f5e9; color:#1b5e20; }
+    .f-coding   { background:#f3e5f5; color:#6a1b9a; }
+    .f-grid2col { background:#e0f2f1; color:#004d40; }
+
+    /* 2-column grid radio layout (real assessment style) */
+    .grid2col-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 24px;
+      margin-top: 6px;
+    }
+    .grid2col-opt {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px;
+      border: 2px solid #e0e0e0; border-radius: 9px;
+      cursor: pointer; font-size: 14px; color: #333;
+      background: #fafafa; transition: .15s; user-select: none;
+    }
+    .grid2col-opt:hover { border-color: #667eea; background: #f0f4ff; }
+    .grid2col-opt.selected { border-color: #667eea; background: #e8f0fe; color: #3949ab; font-weight: 600; }
+    .grid2col-opt input[type=radio] { accent-color: #667eea; width:16px; height:16px; flex-shrink:0; }
+    .grid2col-letter { font-weight: 700; color: #667eea; min-width: 18px; }
+
+    #q-card {
+      background: #fff; border-radius: 14px;
+      box-shadow: 0 4px 18px rgba(0,0,0,.1);
+      padding: 28px 28px 24px;
+      border-top: 5px solid #667eea;
+      animation: fadeIn .25s ease;
+    }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+    #q-text { font-size: 17px; font-weight: 700; color: #1a1a2e; line-height: 1.5; margin-bottom: 22px; }
+
+    .opt-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 14px; margin: 8px 0;
+      border: 2px solid #e0e0e0; border-radius: 9px;
+      cursor: pointer; transition: .15s; font-size: 14px; color: #333; background: #fafafa;
+    }
+    .opt-row:hover { border-color: #667eea; background: #f0f4ff; }
+    .opt-row.selected { border-color: #667eea; background: #e8f0fe; color: #3949ab; font-weight: 600; }
+    .opt-row.correct  { border-color: #43a047; background: #e8f5e9; color: #2e7d32; }
+    .opt-row.wrong    { border-color: #e53935; background: #ffebee; color: #c62828; }
+    .opt-row input[type=radio], .opt-row input[type=checkbox] { accent-color: #667eea; width:16px; height:16px; flex-shrink:0; }
+
+    .role-opt {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 18px; margin: 6px 6px 6px 0;
+      border: 2px solid #e0e0e0; border-radius: 9px;
+      cursor: pointer; font-size: 14px; transition: .15s;
+      user-select: none; background: #fafafa;
+    }
+    .role-opt:hover { border-color: #667eea; background: #f0f4ff; }
+    .role-opt[aria-checked="true"] { border-color: #667eea; background: #e8f0fe; color: #3949ab; font-weight: 600; }
+
+    .btn-opt {
+      display: block; width: 100%; text-align: left;
+      padding: 11px 16px; margin: 8px 0;
+      border: 2px solid #e0e0e0; border-radius: 9px;
+      background: #fafafa; cursor: pointer; font-size: 14px; transition: .15s;
+    }
+    .btn-opt:hover { border-color: #667eea; background: #f0f4ff; }
+    .btn-opt.active { border-color: #667eea; background: #e8f0fe; color: #3949ab; font-weight: 600; }
+
+    select.q-select {
+      width: 100%; padding: 10px 14px; border: 2px solid #e0e0e0;
+      border-radius: 9px; font-size: 14px; margin-top: 4px;
+      background: #fafafa; cursor: pointer;
+    }
+    select.q-select:focus { border-color: #667eea; outline: none; }
+
+    table.q-table { border-collapse: collapse; width: 100%; font-size: 14px; margin-top: 4px; }
+    table.q-table td, table.q-table th { border: 1px solid #e0e0e0; padding: 9px 14px; }
+    table.q-table th { background: #f5f5f5; font-size: 12px; color: #666; }
+    table.q-table tr:hover td { background: #f0f4ff; }
+
+    /* Coding question styles */
+    .code-lang-badge {
+      display: inline-block; font-size: 11px; font-weight: 700;
+      color: #667eea; background: #e8f0fe; padding: 3px 10px;
+      border-radius: 20px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: .5px;
+    }
+    .code-starter {
+      background: #1e1e2e; color: #cdd6f4;
+      padding: 14px 16px; border-radius: 8px;
+      font-size: 13px; font-family: 'Courier New', monospace;
+      overflow-x: auto; margin-bottom: 12px; white-space: pre;
+    }
+    .code-answer {
+      width: 100%; min-height: 140px;
+      padding: 12px 14px; border: 2px solid #e0e0e0; border-radius: 9px;
+      font-family: 'Courier New', monospace; font-size: 13px;
+      background: #fafafa; resize: vertical; outline: none; transition: .15s;
+    }
+    .code-answer:focus { border-color: #667eea; }
+    .code-answer.has-code { border-color: #43a047; background: #f1f8f1; }
+    .code-hint {
+      font-size: 12px; color: #888; margin-top: 8px;
+      padding: 8px 12px; background: #fff8e1; border-radius: 6px; border-left: 3px solid #ffc107;
+    }
+
+    #val-msg { display: none; color: #e53935; font-size: 13px; margin-top: 12px; font-weight: 600; }
+
+    #nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; }
+    .nav-btn { padding: 10px 26px; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; transition: .15s; }
+    #btn-prev { background: #e0e0e0; color: #555; }
+    #btn-prev:hover { background: #bdbdbd; }
+    #btn-next { background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; }
+    #btn-next:hover { filter: brightness(1.1); }
+    #btn-submit { background: #43a047; color: #fff; display: none; }
+    #btn-submit:hover { background: #2e7d32; }
+
+    #results { display: none; background: #fff; border-radius: 14px; box-shadow: 0 4px 18px rgba(0,0,0,.1); padding: 32px; }
+    #results h2 { font-size: 22px; margin-bottom: 6px; color: #1a1a2e; }
+    #score-line { font-size: 15px; color: #555; margin-bottom: 24px; }
+    .res-item { padding: 12px 16px; margin: 8px 0; border-radius: 9px; font-size: 13px; border-left: 4px solid #ccc; }
+    .res-item.ok  { border-color: #43a047; background: #e8f5e9; }
+    .res-item.bad { border-color: #e53935; background: #ffebee; }
+    .res-item.code-ok  { border-color: #7c4dff; background: #ede7f6; }
+    .res-item .res-q  { font-weight: 700; color: #333; margin-bottom: 4px; }
+    .res-item .res-a  { color: #555; }
+    .res-item pre { background: #1e1e2e; color: #cdd6f4; padding: 8px 12px; border-radius: 6px; font-size: 12px; margin-top: 6px; overflow-x: auto; white-space: pre-wrap; }
+    #btn-retry {
+      margin-top: 20px; padding: 10px 28px;
+      background: linear-gradient(135deg,#667eea,#764ba2);
+      color: #fff; border: none; border-radius: 8px;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+    }
+
+    #fs-overlay { display: none; position: fixed; inset: 0; z-index: 9999; background: #1a1a2e; overflow-y: auto; }
+    #fs-overlay.on { display: block; }
+    #fs-inner { max-width: 720px; margin: 0 auto; padding: 56px 16px 60px; }
+    #fs-exit-btn {
+      position: fixed; top: 12px; right: 16px; z-index: 10001;
+      background: #e53935; color: #fff; border: none;
+      border-radius: 6px; padding: 7px 16px; font-size: 13px; font-weight: 700; cursor: pointer;
+    }
+
+    body, #q-text, #q-options, .opt-row, .role-opt, .res-item {
+      -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
+    }
+    input, select, textarea { user-select: text; }
+    * { -webkit-user-drag: none; user-drag: none; }
+  </style>
+</head>
+<body>
+
+<div id="header">
+  <h1>🤖 MCQ Bot — Exam Simulator (14 Formats)</h1>
+  <div id="header-right">
+    <span id="q-counter-hdr" style="font-size:13px;opacity:.85"></span>
+    <button class="hbtn" id="btn-fs"  onclick="enterFS()">⛶ Fullscreen</button>
+    <button class="hbtn" id="btn-efs" onclick="exitFS()">✕ Exit Fullscreen</button>
+  </div>
+</div>
+<div id="progress-wrap"><div id="progress-bar" style="width:7.1%"></div></div>
+
+<div id="exam-shell">
+  <div id="meta-row">
+    <span id="q-counter"></span>
+    <span id="fmt-badge" class="fmt-badge"></span>
+  </div>
+
+  <div id="q-card">
+    <div id="q-text"></div>
+    <div id="q-options"></div>
+    <div id="val-msg">⚠️ Please answer before continuing.</div>
+  </div>
+
+  <div id="nav-row">
+    <button class="nav-btn" id="btn-prev" onclick="go(-1)">← Previous</button>
+    <button class="nav-btn" id="btn-next"   onclick="go(1)">Next →</button>
+    <button class="nav-btn" id="btn-submit" onclick="submitExam()">✅ Submit Exam</button>
+  </div>
+
+  <div id="results">
+    <h2>📊 Exam Results</h2>
+    <div id="score-line"></div>
+    <div id="res-list"></div>
+    <button id="btn-retry" onclick="restart()">🔄 Restart Exam</button>
+  </div>
+</div>
+
+<div id="fs-overlay">
+  <button id="fs-exit-btn" onclick="exitFS()">✕ Exit Fullscreen</button>
+  <div id="fs-inner"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// QUESTION BANK — 14 questions (11 MCQ + 3 Coding)
+// ═══════════════════════════════════════════════════
+const QUESTIONS = [
+  {
+    fmt: 'radio', fmtLabel: 'Format 1 — Radio + Label', fmtClass: 'f-radio',
+    text: '1. What is the capital of France?',
+    type: 'radio', name: 'q1',
+    options: ['A) Paris', 'B) London', 'C) Rome', 'D) Berlin'],
+    correct: ['A) Paris']
+  },
+  {
+    fmt: 'checkbox', fmtLabel: 'Format 2 — Checkbox Multi-Select', fmtClass: 'f-checkbox',
+    text: '2. Select ALL prime numbers from the list:',
+    type: 'checkbox', name: 'q2',
+    options: ['2', '3', '4', '5', '6', '7'],
+    correct: ['2', '3', '5', '7']
+  },
+  {
+    fmt: 'fieldset', fmtLabel: 'Format 3 — Fieldset / Legend', fmtClass: 'f-fieldset',
+    text: '3. Which language runs in a web browser?',
+    type: 'radio', name: 'q3',
+    options: ['A) JavaScript', 'B) Python', 'C) C++', 'D) Java'],
+    correct: ['A) JavaScript']
+  },
+  {
+    fmt: 'bare', fmtLabel: 'Format 4 — Bare Inputs (no label wrap)', fmtClass: 'f-bare',
+    text: '4. Which planet is known as the Red Planet?',
+    type: 'radio', name: 'q4',
+    options: ['Mars', 'Venus', 'Jupiter', 'Saturn'],
+    correct: ['Mars']
+  },
+  {
+    fmt: 'select', fmtLabel: 'Format 5 — Select Dropdown', fmtClass: 'f-select',
+    text: "5. Who wrote 'Hamlet'?",
+    type: 'select', name: 'q5',
+    options: ['-- Choose an answer --', 'A) William Shakespeare', 'B) Charles Dickens', 'C) Mark Twain', 'D) Jane Austen'],
+    correct: ['A) William Shakespeare']
+  },
+  {
+    fmt: 'role', fmtLabel: 'Format 6 — role="radio" Custom Div', fmtClass: 'f-role',
+    text: '6. What is the largest ocean on Earth?',
+    type: 'role-radio', name: 'q6',
+    options: ['A) Atlantic Ocean', 'B) Indian Ocean', 'C) Pacific Ocean', 'D) Arctic Ocean'],
+    correct: ['C) Pacific Ocean']
+  },
+  {
+    fmt: 'button', fmtLabel: 'Format 7 — Button Options (.btn-opt)', fmtClass: 'f-button',
+    text: '7. What is 10 + 5?',
+    type: 'button', name: 'q7',
+    options: ['A) 12', 'B) 15', 'C) 20', 'D) 25'],
+    correct: ['B) 15']
+  },
+  {
+    fmt: 'table', fmtLabel: 'Format 8 — Table Layout', fmtClass: 'f-table',
+    text: '8. Which of these is a programming paradigm?',
+    type: 'radio', name: 'q8',
+    options: ['A) Object-Oriented Programming', 'B) Waterfall Model', 'C) Scrum Framework', 'D) Kanban Board'],
+    correct: ['A) Object-Oriented Programming']
+  },
+  {
+    fmt: 'divopt', fmtLabel: 'Format 9 — Numbered Div Options', fmtClass: 'f-divopt',
+    text: '9. What is the approximate speed of light?',
+    type: 'radio', name: 'q9',
+    options: ['1) 300,000 km/s', '2) 150,000 km/s', '3) 450,000 km/s', '4) 100,000 km/s'],
+    correct: ['1) 300,000 km/s']
+  },
+  {
+    fmt: 'dataattr', fmtLabel: 'Format 10 — Checkbox + data-question', fmtClass: 'f-dataattr',
+    text: '10. Select ALL major cloud providers:',
+    type: 'checkbox', name: 'q10',
+    options: ['AWS (Amazon Web Services)', 'GCP (Google Cloud Platform)', 'Microsoft Azure', 'Heroku', 'Microsoft Excel'],
+    correct: ['AWS (Amazon Web Services)', 'GCP (Google Cloud Platform)', 'Microsoft Azure']
+  },
+  {
+    fmt: 'grid2col', fmtLabel: 'Format 11 — 2-Column Grid Radio (Real Exam Style)', fmtClass: 'f-grid2col',
+    text: '11. In one alloy there is 60% gold in its total mass, while in another alloy it is 35%. 12 kg of the first alloy was melted together with 8 kg of the second one to form a third alloy. Find the percentage of gold in the new alloy.',
+    type: 'grid2col', name: 'q11',
+    options: ['A) 50%', 'B) 68%', 'C) 45%', 'D) 50.2%'],
+    correct: ['A) 50%']
+  },
+  {
+    fmt: 'coding', fmtLabel: 'Format 12 — Coding: FizzBuzz (JavaScript)', fmtClass: 'f-coding',
+    text: '12. Write a JavaScript function fizzBuzz(n) that returns "Fizz" if n is divisible by 3, "Buzz" if divisible by 5, "FizzBuzz" if both, otherwise the number as a string.',
+    type: 'coding', name: 'q12',
+    language: 'javascript',
+    starterCode: 'function fizzBuzz(n) {\n  // your code here\n}',
+    correct: ['fizzBuzz']
+  },
+  {
+    fmt: 'coding', fmtLabel: 'Format 13 — Coding: Reverse String (Python)', fmtClass: 'f-coding',
+    text: '13. Write a Python function reverse_string(s) that returns the string s reversed. Example: reverse_string("hello") → "olleh".',
+    type: 'coding', name: 'q13',
+    language: 'python',
+    starterCode: 'def reverse_string(s):\n    # your code here\n    pass',
+    correct: ['reverse_string']
+  },
+  {
+    fmt: 'coding', fmtLabel: 'Format 14 — Coding: Two Sum (JavaScript)', fmtClass: 'f-coding',
+    text: '14. Write a JavaScript function twoSum(nums, target) that returns the indices [i, j] of the two numbers in nums that add up to target. Assume exactly one solution exists.',
+    type: 'coding', name: 'q14',
+    language: 'javascript',
+    starterCode: 'function twoSum(nums, target) {\n  // your code here\n}',
+    correct: ['twoSum']
+  }
+];
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+let current = 0;
+const userAnswers = QUESTIONS.map(() => []);
+
+// ═══════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════
+function render() {
+  const q = QUESTIONS[current];
+  const total = QUESTIONS.length;
+
+  document.getElementById('q-counter').textContent = `Question ${current + 1} of ${total}`;
+  document.getElementById('q-counter-hdr').textContent = `${current + 1}/${total}`;
+  const badge = document.getElementById('fmt-badge');
+  badge.textContent = q.fmtLabel;
+  badge.className = 'fmt-badge ' + q.fmtClass;
+
+  document.getElementById('progress-bar').style.width = ((current + 1) / total * 100) + '%';
+  document.getElementById('q-text').textContent = q.text;
+
+  const container = document.getElementById('q-options');
+  container.innerHTML = '';
+  const saved = userAnswers[current] || [];
+
+  if (q.type === 'radio' || q.type === 'checkbox') {
+    q.options.forEach((opt, i) => {
+      const row = document.createElement('label');
+      row.className = 'opt-row' + (saved.includes(opt) ? ' selected' : '');
+      row.setAttribute('data-val', opt);
+
+      const inp = document.createElement('input');
+      inp.type = q.type;
+      inp.name = q.name;
+      inp.value = opt;
+      inp.checked = saved.includes(opt);
+
+      if (q.fmt === 'fieldset') {
+        if (i === 0) {
+          const fs = document.createElement('fieldset');
+          fs.style.cssText = 'border:none;padding:0;margin:0';
+          const lg = document.createElement('legend');
+          lg.style.cssText = 'display:none';
+          lg.textContent = q.text;
+          fs.appendChild(lg);
+          container.appendChild(fs);
+        }
+      }
+
+      if (q.fmt === 'table') {
+        if (i === 0) {
+          const tbl = document.createElement('table');
+          tbl.className = 'q-table';
+          tbl.innerHTML = '<thead><tr><th>Select</th><th>Option</th></tr></thead><tbody id="q-tbody"></tbody>';
+          container.appendChild(tbl);
+        }
+        const tbody = document.getElementById('q-tbody');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td></td><td>${opt}</td>`;
+        tr.cells[0].appendChild(inp);
+        inp.addEventListener('change', () => handleChange(q, opt, inp));
+        tr.addEventListener('click', () => inp.click());
+        if (saved.includes(opt)) tr.classList.add('selected');
+        tbody.appendChild(tr);
+        return;
+      }
+
+      inp.addEventListener('change', () => handleChange(q, opt, inp));
+      row.appendChild(inp);
+      row.appendChild(document.createTextNode(' ' + opt));
+      row.addEventListener('click', () => setTimeout(() => syncRowStyles(q), 10));
+
+      const parent = container.querySelector('fieldset') || container;
+      parent.appendChild(row);
+    });
+
+  } else if (q.type === 'select') {
+    const sel = document.createElement('select');
+    sel.className = 'q-select';
+    sel.name = q.name;
+    q.options.forEach(opt => {
+      const o = document.createElement('option');
+      o.value = opt === '-- Choose an answer --' ? '' : opt;
+      o.textContent = opt;
+      if (saved.includes(opt)) o.selected = true;
+      sel.appendChild(o);
+    });
+    sel.addEventListener('change', () => { userAnswers[current] = sel.value ? [sel.value] : []; });
+    container.appendChild(sel);
+
+  } else if (q.type === 'role-radio') {
+    const group = document.createElement('div');
+    group.setAttribute('role', 'radiogroup');
+    q.options.forEach(opt => {
+      const d = document.createElement('div');
+      d.className = 'role-opt';
+      d.setAttribute('role', 'radio');
+      d.setAttribute('aria-checked', saved.includes(opt) ? 'true' : 'false');
+      d.setAttribute('tabindex', '0');
+      d.setAttribute('data-val', opt);
+      d.textContent = opt;
+      d.addEventListener('click', () => {
+        group.querySelectorAll('[role="radio"]').forEach(r => r.setAttribute('aria-checked','false'));
+        d.setAttribute('aria-checked','true');
+        userAnswers[current] = [opt];
+      });
+      d.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') d.click(); });
+      group.appendChild(d);
+    });
+    container.appendChild(group);
+
+  } else if (q.type === 'button') {
+    // Wrap in a div with id so the detector's button fallback finds it
+    const wrap = document.createElement('div');
+    wrap.id = 'q-btn-group';
+    q.options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'btn-opt' + (saved.includes(opt) ? ' active' : '');
+      btn.textContent = opt;
+      btn.setAttribute('data-val', opt);
+      btn.addEventListener('click', () => {
+        wrap.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        userAnswers[current] = [opt];
+      });
+      wrap.appendChild(btn);
+    });
+    container.appendChild(wrap);
+
+  } else if (q.type === 'grid2col') {
+    // 2-column grid radio layout matching real assessment platforms
+    const grid = document.createElement('div');
+    grid.className = 'grid2col-wrap';
+    grid.setAttribute('data-question', q.name);
+    const letters = ['A','B','C','D','E'];
+    q.options.forEach((opt, i) => {
+      const label = document.createElement('label');
+      label.className = 'grid2col-opt' + (saved.includes(opt) ? ' selected' : '');
+      label.setAttribute('data-val', opt);
+      const inp = document.createElement('input');
+      inp.type = 'radio'; inp.name = q.name; inp.value = opt;
+      inp.checked = saved.includes(opt);
+      inp.addEventListener('change', () => { userAnswers[current] = [opt]; syncGrid2Col(grid); });
+      const letter = document.createElement('span');
+      letter.className = 'grid2col-letter'; letter.textContent = letters[i];
+      const txt = document.createElement('span');
+      // show text without the "A) " prefix since we render letter separately
+      txt.textContent = opt.replace(/^[A-E]\)\s*/, '');
+      label.appendChild(inp); label.appendChild(letter); label.appendChild(txt);
+      label.addEventListener('click', () => setTimeout(() => syncGrid2Col(grid), 10));
+      grid.appendChild(label);
+    });
+    container.appendChild(grid);
+
+  } else if (q.type === 'coding') {
+    const wrap = document.createElement('div');
+    wrap.className = 'code-question';
+    wrap.setAttribute('data-coding-name', q.name);
+    wrap.setAttribute('data-language', q.language);
+
+    const langBadge = document.createElement('span');
+    langBadge.className = 'code-lang-badge';
+    langBadge.textContent = '💻 ' + q.language.toUpperCase();
+    wrap.appendChild(langBadge);
+
+    const pre = document.createElement('pre');
+    pre.className = 'code-starter';
+    pre.textContent = q.starterCode;
+    wrap.appendChild(pre);
+
+    const ta = document.createElement('textarea');
+    ta.className = 'code-answer' + (saved.length > 0 ? ' has-code' : '');
+    ta.placeholder = 'Write your ' + q.language + ' solution here...';
+    ta.value = saved.length > 0 ? saved[0] : q.starterCode;
+    ta.setAttribute('data-coding', q.name);
+    ta.spellcheck = false;
+    ta.addEventListener('input', () => {
+      userAnswers[current] = ta.value.trim() ? [ta.value.trim()] : [];
+      ta.classList.toggle('has-code', ta.value.trim().length > 0);
+    });
+    wrap.appendChild(ta);
+
+    const hint = document.createElement('div');
+    hint.className = 'code-hint';
+    hint.innerHTML = '💡 <strong>Auto-code bot:</strong> Click "Scan &amp; Answer MCQs" in the extension panel — the AI will write this solution automatically.';
+    wrap.appendChild(hint);
+
+    container.appendChild(wrap);
+  }
+
+  document.getElementById('val-msg').style.display = 'none';
+  document.getElementById('btn-prev').style.visibility = current === 0 ? 'hidden' : 'visible';
+  const isLast = current === total - 1;
+  document.getElementById('btn-next').style.display   = isLast ? 'none' : 'inline-block';
+  document.getElementById('btn-submit').style.display = isLast ? 'inline-block' : 'none';
+}
+
+// ═══════════════════════════════════════════════════
+// CHANGE HANDLER
+// ═══════════════════════════════════════════════════
+function handleChange(q, opt, inp) {
+  if (q.type === 'radio') {
+    userAnswers[current] = [opt];
+  } else {
+    const arr = userAnswers[current];
+    if (inp.checked) { if (!arr.includes(opt)) arr.push(opt); }
+    else { const i = arr.indexOf(opt); if (i > -1) arr.splice(i, 1); }
+  }
+  syncRowStyles(q);
+}
+
+function syncGrid2Col(grid) {
+  grid.querySelectorAll('.grid2col-opt').forEach(lbl => {
+    const val = lbl.getAttribute('data-val');
+    lbl.classList.toggle('selected', userAnswers[current].includes(val));
+  });
+}
+
+function syncRowStyles(q) {
+  document.querySelectorAll('#q-options .opt-row').forEach(row => {
+    row.classList.toggle('selected', userAnswers[current].includes(row.getAttribute('data-val')));
+  });
+  document.querySelectorAll('#q-tbody tr').forEach(tr => {
+    const inp = tr.querySelector('input');
+    if (inp) tr.classList.toggle('selected', inp.checked);
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════
+function go(dir) {
+  if (dir === 1 && !hasAnswer()) {
+    document.getElementById('val-msg').style.display = 'block';
+    return;
+  }
+  current = Math.max(0, Math.min(QUESTIONS.length - 1, current + dir));
+  render();
+}
+
+function hasAnswer() {
+  const q = QUESTIONS[current];
+  if (q.type === 'select') {
+    const sel = document.querySelector('#q-options select');
+    return sel && sel.value !== '';
+  }
+  if (q.type === 'role-radio') {
+    return !!document.querySelector('[role="radio"][aria-checked="true"]') || userAnswers[current].length > 0;
+  }
+  if (q.type === 'button') {
+    return !!document.querySelector('.btn-opt.active') || userAnswers[current].length > 0;
+  }
+  if (q.type === 'grid2col') {
+    return !!document.querySelector('.grid2col-opt.selected') || userAnswers[current].length > 0;
+  }
+  if (q.type === 'coding') {
+    return userAnswers[current].length > 0 && userAnswers[current][0].trim().length > 10;
+  }
+  return userAnswers[current].length > 0;
+}
+
+// ═══════════════════════════════════════════════════
+// SUBMIT
+// ═══════════════════════════════════════════════════
+function submitExam() {
+  if (!hasAnswer()) { document.getElementById('val-msg').style.display = 'block'; return; }
+
+  let score = 0;
+  const resList = document.getElementById('res-list');
+  resList.innerHTML = '';
+
+  QUESTIONS.forEach((q, i) => {
+    let ok = false;
+    if (q.type === 'coding') {
+      const code = userAnswers[i][0] || '';
+      ok = code.includes(q.correct[0]);
+    } else if (q.type === 'grid2col') {
+      ok = userAnswers[i].length > 0 && userAnswers[i][0] === q.correct[0];
+    } else {
+      ok = [...userAnswers[i]].sort().join('|') === [...q.correct].sort().join('|');
+    }
+    if (ok) score++;
+
+    const div = document.createElement('div');
+    if (q.type === 'coding') {
+      div.className = 'res-item ' + (ok ? 'code-ok' : 'bad');
+      const code = userAnswers[i][0] || '(none)';
+      div.innerHTML = `
+        <div class="res-q">${ok ? '✅' : '❌'} Q${i+1}: ${q.text.substring(0, 80)}...</div>
+        <div class="res-a">Your code (${q.language}):<pre>${escHtml(code.substring(0, 300))}${code.length > 300 ? '\n...' : ''}</pre></div>`;
+    } else {
+      div.className = 'res-item ' + (ok ? 'ok' : 'bad');
+      div.innerHTML = `
+        <div class="res-q">${ok ? '✅' : '❌'} Q${i+1}: ${q.text}</div>
+        <div class="res-a">
+          Your answer: <strong>${userAnswers[i].join(', ') || '(none)'}</strong><br>
+          Correct: <strong>${q.correct.join(', ')}</strong>
+        </div>`;
+    }
+    resList.appendChild(div);
+  });
+
+  document.getElementById('score-line').textContent =
+    `Score: ${score} / ${QUESTIONS.length}  (${Math.round(score/QUESTIONS.length*100)}%)`;
+
+  document.getElementById('q-card').style.display    = 'none';
+  document.getElementById('meta-row').style.display  = 'none';
+  document.getElementById('nav-row').style.display   = 'none';
+  document.getElementById('results').style.display   = 'block';
+  document.getElementById('progress-bar').style.width = '100%';
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function restart() {
+  current = 0;
+  QUESTIONS.forEach((_, i) => { userAnswers[i] = []; });
+  document.getElementById('results').style.display  = 'none';
+  document.getElementById('q-card').style.display   = 'block';
+  document.getElementById('meta-row').style.display = 'flex';
+  document.getElementById('nav-row').style.display  = 'flex';
+  render();
+}
+
+// ═══════════════════════════════════════════════════
+// FULLSCREEN
+// ═══════════════════════════════════════════════════
+function enterFS() {
+  const shell = document.getElementById('exam-shell');
+  document.getElementById('fs-inner').appendChild(shell);
+  document.getElementById('fs-overlay').classList.add('on');
+  document.getElementById('btn-fs').style.display  = 'none';
+  document.getElementById('btn-efs').style.display = 'inline-block';
+  document.documentElement.requestFullscreen?.().catch(() => {});
+}
+function exitFS() {
+  document.body.appendChild(document.getElementById('exam-shell'));
+  document.getElementById('fs-overlay').classList.remove('on');
+  document.getElementById('btn-fs').style.display  = 'inline-block';
+  document.getElementById('btn-efs').style.display = 'none';
+  if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+}
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement && document.getElementById('fs-overlay').classList.contains('on')) exitFS();
+});
+
+// ═══════════════════════════════════════════════════
+// ANTI-CHEAT
+// ═══════════════════════════════════════════════════
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('copy',  e => e.preventDefault());
+document.addEventListener('cut',   e => e.preventDefault());
+document.addEventListener('paste', e => { if (!['INPUT','TEXTAREA'].includes(e.target.tagName)) e.preventDefault(); });
+document.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  const ctrl = e.ctrlKey || e.metaKey;
+  if (ctrl && ['c','x','v','a','s','p','u'].includes(k)) { e.preventDefault(); return; }
+  if (ctrl && e.shiftKey && ['i','j','c'].includes(k))   { e.preventDefault(); return; }
+  if (e.key === 'F12') { e.preventDefault(); return; }
+  if (e.key === 'F5' || (ctrl && k === 'r')) { e.preventDefault(); return; }
+  if (ctrl && k === 'f') { e.preventDefault(); return; }
+});
+document.addEventListener('mousedown', e => { if (e.button === 1 || e.button === 2) e.preventDefault(); });
+document.addEventListener('dragstart', e => e.preventDefault());
+window.addEventListener('beforeprint', e => e.preventDefault());
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) console.warn('[Exam] Tab switched');
+});
+document.addEventListener('selectstart', e => {
+  if (['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)) return;
+  e.preventDefault();
+});
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+# Optional OCR dependencies
+# This file contains optional, heavier OCR packages (not installed by default).
+# Installing these is required for `easyocr` and PyTorch-based OCR functionality.
+
+easyocr==1.6.2
+# Note: `torch` is required by `easyocr`. Install the CPU-only wheel with the
+# official PyTorch index for best compatibility on many systems:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+google-cloud-vision==3.3.0

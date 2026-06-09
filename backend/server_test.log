@@ -1,0 +1,17 @@
+INFO:whatsapp_web:[WAWeb] Bridge files created at c:\Users\krant\Downloads\b_lfJWY8zj8u2\backend\wa_bridge
+INFO:whatsapp_web:[WAWeb] Run: cd backend/wa_bridge && npm install
+WARNING:app:GEMINI_API_URL not set in .env (Gemini fallback will not work)
+Starting MCQ Automation Bot Server...
+==================================================
+Backend URL: http://localhost:5000
+Frontend URL: Open frontend/index.html in your browser
+==================================================
+[OK] All required packages are installed
+[OK] ChromeDriver is available
+ * Serving Flask app 'app'
+ * Debug mode: off
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.0.181:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WhatsApp Web - MCQ Bot</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      width: 420px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+      text-align: center;
+    }
+    .logo { font-size: 48px; margin-bottom: 12px; }
+    h1 { font-size: 22px; color: #111; margin-bottom: 6px; }
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 28px; }
+
+    #qr-box {
+      width: 256px;
+      height: 256px;
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      background: #fafafa;
+    }
+    #qr-box canvas, #qr-box img { border-radius: 8px; }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .status-badge.waiting  { background: #fff3cd; color: #856404; }
+    .status-badge.scanning { background: #cce5ff; color: #004085; }
+    .status-badge.ready    { background: #d4edda; color: #155724; }
+    .status-badge.error    { background: #f8d7da; color: #721c24; }
+
+    .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: pulse 1.2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .steps {
+      text-align: left;
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-top: 8px;
+    }
+    .steps p { font-size: 13px; color: #444; margin-bottom: 6px; font-weight: 600; }
+    .steps ol { padding-left: 18px; }
+    .steps li { font-size: 13px; color: #555; margin-bottom: 4px; line-height: 1.5; }
+
+    .spinner {
+      width: 48px; height: 48px;
+      border: 4px solid #e0e0e0;
+      border-top-color: #25d366;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .refresh-btn {
+      margin-top: 16px;
+      padding: 10px 24px;
+      background: #25d366;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .refresh-btn:hover { background: #1ebe5d; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">📱</div>
+  <h1>WhatsApp Web — MCQ Bot</h1>
+  <p class="subtitle">Scan QR with WhatsApp to connect</p>
+
+  <div id="status-badge" class="status-badge waiting">
+    <span class="dot"></span>
+    <span id="status-text">Connecting...</span>
+  </div>
+
+  <div id="qr-box">
+    <div class="spinner"></div>
+  </div>
+
+  <div class="steps">
+    <p>How to scan:</p>
+    <ol>
+      <li>Open WhatsApp on your phone</li>
+      <li>Tap <strong>⋮ Menu → Linked Devices</strong></li>
+      <li>Tap <strong>Link a Device</strong></li>
+      <li>Point camera at the QR code above</li>
+    </ol>
+  </div>
+
+  <button class="refresh-btn" onclick="checkStatus()">🔄 Refresh</button>
+</div>
+
+<script>
+  let pollTimer = null;
+
+  function setStatus(type, text) {
+    const badge = document.getElementById('status-badge');
+    badge.className = 'status-badge ' + type;
+    badge.innerHTML = `<span class="dot"></span><span>${text}</span>`;
+    document.getElementById('status-text') && (document.getElementById('status-text').textContent = text);
+  }
+
+  function renderQR(qrString) {
+    const box = document.getElementById('qr-box');
+    box.innerHTML = '';
+    new QRCode(box, {
+      text: qrString,
+      width: 240,
+      height: 240,
+      colorDark: '#000',
+      colorLight: '#fff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  }
+
+  function showReady() {
+    const box = document.getElementById('qr-box');
+    box.innerHTML = '<div style="font-size:64px">✅</div>';
+    setStatus('ready', 'WhatsApp Connected!');
+    clearInterval(pollTimer);
+  }
+
+  function showSpinner() {
+    document.getElementById('qr-box').innerHTML = '<div class="spinner"></div>';
+  }
+
+  async function checkStatus() {
+    try {
+      const res = await fetch('/api/whatsapp/qr');
+
+      // Handle non-JSON responses
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); }
+      catch(e) {
+        setStatus('error', 'Server error: ' + text.substring(0, 60));
+        return;
+      }
+
+      if (data.status === 'ready') {
+        showReady();
+      } else if (data.status === 'qr' && data.qr) {
+        renderQR(data.qr);
+        setStatus('scanning', 'Scan QR with WhatsApp');
+      } else if (data.status === 'starting') {
+        showSpinner();
+        setStatus('waiting', 'Bridge starting... please wait');
+      } else {
+        showSpinner();
+        setStatus('waiting', data.message || 'Waiting for QR...');
+      }
+    } catch (e) {
+      setStatus('error', 'Cannot reach server — is it running?');
+      showSpinner();
+    }
+  }
+
+  // Poll every 3 seconds
+  checkStatus();
+  pollTimer = setInterval(checkStatus, 3000);
+</script>
+</body>
+</html>
